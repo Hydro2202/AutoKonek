@@ -4,6 +4,50 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+
+    /* AutoKonek brand palette */
+    --color-navy: #142B45;
+    --color-navy-700: #1c3a5c;
+    --color-steel: #426B8A;
+    --color-accent: #F28C28;
+    --color-accent-600: #d97a1a;
+    --color-page: #F4F6F8;
+    --color-ink: #252B33;
+    --color-muted: #667085;
+    --color-line: #E2E8F0;
+    --color-success: #16A34A;
+    --color-warning: #D97706;
+    --color-danger: #DC2626;
+}
+
+@layer base {
+    html { scroll-behavior: smooth; }
+    body { @apply bg-page text-ink antialiased; }
+    h1, h2, h3, h4 { @apply text-navy font-bold tracking-tight; }
+    :focus-visible { @apply outline-2 outline-offset-2 outline-steel; }
+}
+
+/* Reusable component classes. @utility lets one class build on another (e.g. btn-primary uses btn). */
+@utility card { @apply bg-white border border-line rounded-lg; }
+
+@utility btn { @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer; }
+@utility btn-primary { @apply btn bg-accent text-navy hover:bg-accent-600; }
+@utility btn-navy { @apply btn bg-navy text-white hover:bg-navy-700; }
+@utility btn-outline { @apply btn bg-white text-navy border border-line hover:bg-page; }
+@utility btn-danger { @apply btn bg-danger text-white hover:bg-red-700; }
+@utility btn-sm { @apply px-3 py-1.5 text-xs; }
+
+@utility label { @apply block text-sm font-semibold text-ink mb-1; }
+@utility input { @apply block w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink placeholder:text-muted focus:border-steel focus:ring-2 focus:ring-steel/20 focus:outline-none; }
+@utility input-error { @apply border-danger; }
+@utility hint { @apply text-xs text-muted mt-1; }
+@utility error-text { @apply text-xs text-danger mt-1; }
+
+@utility table-wrap { @apply bg-white border border-line rounded-lg overflow-x-auto; }
+@utility table {
+    @apply w-full text-sm text-left;
+    & thead { @apply bg-page text-xs uppercase tracking-wide text-muted; }
+    & th { @apply px-4 py-3 font-semibold whitespace-nowrap; }
+    & td { @apply px-4 py-3 border-t border-line align-top; }
 }
