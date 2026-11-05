@@ -34,7 +34,7 @@
                         <span class="max-w-32 truncate">{{ $user->name }}</span>
                         <x-ui.icon name="chevron-down" class="size-4 text-white/60" />
                     </summary>
-                    <div class="absolute right-0 mt-3 w-56 overflow-hidden rounded-md border border-line bg-white text-sm text-ink shadow-xl shadow-navy/15">
+                    <div class="menu-pop absolute right-0 mt-3 w-56 overflow-hidden rounded-md border border-line bg-white text-sm text-ink shadow-xl shadow-navy/15">
                         <p class="border-b border-line px-4 py-2.5 text-xs text-muted">Signed in as {{ $user->roleLabel() }}</p>
                         <a href="{{ route('dashboard') }}" class="block px-4 py-2.5 hover:bg-page">{{ $user->isCustomer() ? 'Browse services' : 'Dashboard' }}</a>
                         @if ($user->isCustomer())
@@ -57,7 +57,7 @@
                 class="rounded-sign p-2 text-white hover:bg-white/10 md:hidden" aria-label="Menu"><x-ui.icon name="menu" class="size-6" /></button>
     </nav>
 
-    <div id="mobile-menu" class="hidden border-t border-white/10 px-4 pt-3 pb-4 md:hidden">
+    <div id="mobile-menu" class="anim-menu hidden border-t border-white/10 px-4 pt-3 pb-4 md:hidden">
         <div class="flex flex-col">
             @foreach ($links as [$route, $label])
                 <a href="{{ route($route) }}" class="rounded-sign px-3 py-3 text-base font-medium text-white/90 hover:bg-white/10">{{ $label }}</a>

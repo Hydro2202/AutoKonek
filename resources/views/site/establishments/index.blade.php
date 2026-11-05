@@ -46,7 +46,7 @@
             @if ($filterCount)<span class="rounded-full bg-accent px-2 text-xs font-bold text-navy-950">{{ $filterCount }}</span>@endif
         </button>
 
-        <div id="filter-panel" class="mt-3 hidden space-y-6 rounded-lg border border-line bg-white p-5 lg:sticky lg:top-24 lg:mt-0 lg:block">
+        <div id="filter-panel" class="anim-menu mt-3 hidden space-y-6 rounded-lg border border-line bg-white p-5 lg:sticky lg:top-24 lg:mt-0 lg:block">
             <div>
                 <label for="q" class="label">Name</label>
                 <div class="relative">
@@ -162,7 +162,7 @@
         @else
             <div class="mt-5 space-y-4">
                 @foreach ($establishments as $establishment)
-                    <x-listing.card :establishment="$establishment" />
+                    <x-listing.card :establishment="$establishment" class="anim-rise" :style="'--i: '.$loop->index" />
                 @endforeach
             </div>
             <div class="mt-8">{{ $establishments->links() }}</div>

@@ -54,6 +54,61 @@ dialog::backdrop { background: rgb(10 24 40 / 0.55); }
 
 .toast-leave { opacity: 0; transform: translateY(8px); transition: opacity 0.2s, transform 0.2s; }
 
+/*
+| Supporting motion. Each effect shows something: new data arriving, a status that needs attention,
+| a menu opening, a timer running. Nothing loops except the single "in review" pulse and loading lines.
+*/
+
+/* The page softly fades in. */
+#main { animation: page-in 0.22s ease-out; }
+@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Lists of results rise in a short, quick sequence (set --i on each item). */
+.anim-rise { animation: rise 0.36s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(min(var(--i, 0), 7) * 45ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Rating bars fill in, and chart columns grow up from the baseline (set --i for the order). */
+.bar-grow { transform-origin: left; animation: bar-grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 70ms + 150ms); }
+@keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.chart-bar { transform-box: fill-box; transform-origin: 50% 100%; animation: column-grow 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 30ms); }
+@keyframes column-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* A listing that is waiting for review quietly pulses its marker. */
+.track-step[data-state='current'][data-tone='warning'] .track-dot::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 2px solid var(--color-warning);
+    opacity: 0;
+    animation: pulse-ring 2.4s ease-out infinite;
+}
+@keyframes pulse-ring { 0% { transform: scale(0.7); opacity: 0.7; } 70%, 100% { transform: scale(1.5); opacity: 0; } }
+
+/* Menus open from where they were clicked. */
+.menu-pop { transform-origin: top right; animation: menu-in 0.14s ease-out; }
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+@media (max-width: 1023px) { .anim-menu { animation: menu-in 0.16s ease-out; transform-origin: top; } }
+
+/* A road line that draws itself once, when it scrolls into view (class added by reveal.js). */
+.js .draw-line { transform: scaleX(0); transform-origin: left; transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.js .draw-line.is-visible { transform: none; }
+
+/* Success toasts show how long they will stay. */
+.toast-timer { position: absolute; inset-inline: 0; bottom: 0; height: 3px; background: var(--color-success); transform-origin: left; animation: toast-timer 6s linear forwards; }
+@keyframes toast-timer { to { transform: scaleX(0); } }
+
+dialog[open]::backdrop { animation: fade-in 0.2s ease-out; }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Small arrow icons lean into the direction of travel when their button is hovered. */
+.icon-nudge { transition: transform 0.15s ease-out; }
+a:hover > .icon-nudge, button:hover > .icon-nudge { transform: translateX(3px); }
+
+/* The same dashed "road line" used on buttons, for anything that is waiting on the network. */
+.road-loading { position: relative; overflow: hidden; }
+.road-loading::after { content: ''; position: absolute; left: -16px; right: 0; bottom: 0; border-bottom: 3px dashed var(--color-steel); opacity: 0.5; animation: var(--animate-road); }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.001ms !important;

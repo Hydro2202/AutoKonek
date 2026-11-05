@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Demonstration data for Lucena City and nearby Quezon towns. Local development only.
- * All demo accounts use the password "password".
+ * All demo accounts use the password "password123".
  * Run PhilippineLocationSeeder and CategorySeeder first.
  *
  *  - The approved listings are REAL places (gas stations, car washes, repair shops...) taken from
@@ -38,7 +38,7 @@ class DemoSeeder extends Seeder
 
     public function run(): void
     {
-        $password = Hash::make('password');
+        $password = Hash::make('password123');
 
         $makeUser = function (string $name, string $email, string $role) use ($password) {
             $user = User::firstOrNew(['email' => $email]);
@@ -50,10 +50,10 @@ class DemoSeeder extends Seeder
             return $user;
         };
 
-        $owner1 = $makeUser('Maria Santos', 'owner1@autokonek.test', User::ROLE_OWNER);
-        $owner2 = $makeUser('Jose Reyes', 'owner2@autokonek.test', User::ROLE_OWNER);
+        $owner1 = $makeUser('Maria Santos', 'user1@gmail.com', User::ROLE_OWNER);
+        $owner2 = $makeUser('Jose Reyes', 'user2@gmail.com', User::ROLE_OWNER);
         $customers = collect([
-            ['Ana Cruz', 'customer1@autokonek.test'],
+            ['Ana Cruz', 'customer@gmail.com'],
             ['Ben Garcia', 'customer2@autokonek.test'],
             ['Carla Mendoza', 'customer3@autokonek.test'],
             ['Dan Villanueva', 'customer4@autokonek.test'],

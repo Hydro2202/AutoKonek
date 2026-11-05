@@ -152,7 +152,7 @@
                         @foreach ($distribution as $star => $number)
                             <li class="flex items-center gap-3 text-sm">
                                 <span class="w-12 text-muted">{{ $star }} {{ Str::plural('star', $star) }}</span>
-                                <span class="h-2.5 flex-1 overflow-hidden rounded-full bg-page"><span class="block h-full rounded-full bg-accent" style="width: {{ $total ? round($number / $total * 100) : 0 }}%"></span></span>
+                                <span class="h-2.5 flex-1 overflow-hidden rounded-full bg-page"><span class="bar-grow block h-full rounded-full bg-accent" style="width: {{ $total ? round($number / $total * 100) : 0 }}%; --i: {{ $loop->index }}"></span></span>
                                 <span class="w-6 text-right tabular-nums text-muted">{{ $number }}</span>
                             </li>
                         @endforeach

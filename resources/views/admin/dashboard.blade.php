@@ -51,8 +51,8 @@
                     @endphp
                     <g>
                         <title>{{ $day['date']->format('M j') }}: {{ $day['users'] }} new {{ Str::plural('user', $day['users']) }}, {{ $day['reviews'] }} new {{ Str::plural('review', $day['reviews']) }}</title>
-                        <rect x="{{ $x }}" y="{{ $chartHeight - $usersHeight }}" width="{{ $barWidth }}" height="{{ max($usersHeight, $day['users'] ? 2 : 0) }}" rx="2" fill="var(--color-steel)" />
-                        <rect x="{{ $x + $barWidth + 2 }}" y="{{ $chartHeight - $reviewsHeight }}" width="{{ $barWidth }}" height="{{ max($reviewsHeight, $day['reviews'] ? 2 : 0) }}" rx="2" fill="var(--color-accent)" />
+                        <rect class="chart-bar" style="--i: {{ $i }}" x="{{ $x }}" y="{{ $chartHeight - $usersHeight }}" width="{{ $barWidth }}" height="{{ max($usersHeight, $day['users'] ? 2 : 0) }}" rx="2" fill="var(--color-steel)" />
+                        <rect class="chart-bar" style="--i: {{ $i }}" x="{{ $x + $barWidth + 2 }}" y="{{ $chartHeight - $reviewsHeight }}" width="{{ $barWidth }}" height="{{ max($reviewsHeight, $day['reviews'] ? 2 : 0) }}" rx="2" fill="var(--color-accent)" />
                     </g>
                     @if ($i % 2 === 0 || $loop->last)
                         <text x="{{ $x + $barWidth }}" y="{{ $chartHeight + 16 }}" font-size="11" text-anchor="middle" fill="var(--color-muted)">{{ $day['date']->format('M j') }}</text>

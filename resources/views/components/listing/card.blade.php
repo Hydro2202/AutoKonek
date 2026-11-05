@@ -1,6 +1,8 @@
 {{-- Listing card shaped like a garage job card: photo on the left, perforated edge, details on the right. --}}
 @props(['establishment'])
-<article class="ticket">
+<article {{ $attributes->merge(['class' => 'ticket']) }}>
+    {{-- Covers the whole card so a click anywhere opens the listing. The title link below is the keyboard and screen reader link. --}}
+    <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}" tabindex="-1" aria-hidden="true" class="absolute inset-0 z-[1]"></a>
     <div class="ticket-media">
         <img src="{{ $establishment->imageUrl() }}" alt="" loading="lazy" class="size-full object-cover">
         <span class="sign absolute top-3 left-3 size-9" title="{{ $establishment->category?->name }}">
@@ -12,8 +14,7 @@
         <p class="text-sm font-semibold text-steel">{{ $establishment->category?->name }}</p>
 
         <h3 class="mt-0.5 text-[1.6rem]">
-            {{-- The title link stretches over the whole card. --}}
-            <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}" class="after:absolute after:inset-0 after:z-[1] hover:text-steel">{{ $establishment->name }}</a>
+            <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}" class="hover:text-steel">{{ $establishment->name }}</a>
         </h3>
 
         <p class="mt-1.5 flex items-start gap-1.5 text-[0.9375rem] text-muted">
@@ -42,7 +43,7 @@
                    class="btn-outline btn-sm" title="Show the route from where you are" aria-label="Directions to {{ $establishment->name }}">
                     <x-ui.icon name="navigation" class="size-3.5" /> Directions
                 </a>
-                <span class="btn-navy btn-sm pointer-events-none">Details <x-ui.icon name="arrow-right" class="size-3.5" /></span>
+                <span class="btn-navy btn-sm pointer-events-none" aria-hidden="true">Details <x-ui.icon name="arrow-right" class="size-3.5" /></span>
             </div>
         </div>
     </div>

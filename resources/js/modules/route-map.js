@@ -146,8 +146,9 @@ export function initRouteMap() {
 
         const say = (text) => { message.textContent = text; };
 
-        const showSummary = (text) => {
+        const showSummary = (text, waiting = false) => {
             summary.hidden = false;
+            summary.classList.toggle('road-loading', waiting);
             summary.replaceChildren(document.createTextNode(text));
         };
 
@@ -165,11 +166,11 @@ export function initRouteMap() {
             panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             try {
-                showSummary('Finding your position...');
+                showSummary('Finding your position...', true);
                 const { coords } = await locate();
                 const start = [coords.longitude, coords.latitude];
 
-                showSummary('Calculating the route...');
+                showSummary('Calculating the route...', true);
                 const response = await fetch(`${ROUTING_URL}/${start.join(',')};${end.join(',')}?overview=full&geometries=geojson&steps=true`);
                 const data = await response.json();
                 if (!response.ok || data.code !== 'Ok') throw new Error('No driving route was found between you and this place.');

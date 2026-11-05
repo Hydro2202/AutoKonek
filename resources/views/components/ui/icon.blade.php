@@ -57,4 +57,4 @@
     $inner = $paths[$name] ?? $paths['info'];
     $fill = $name === 'star' ? 'currentColor' : 'none';
 @endphp
-<svg {{ $attributes->merge(['class' => $class]) }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="{{ $fill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{!! $inner !!}</svg>
+<svg {{ $attributes->merge(['class' => $class.($name === 'arrow-right' ? ' icon-nudge' : '')]) }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="{{ $fill }}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{!! $inner !!}</svg>

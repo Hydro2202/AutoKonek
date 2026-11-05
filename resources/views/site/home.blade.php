@@ -18,12 +18,12 @@
                 <input id="hero-q" type="search" name="q" placeholder="Name of a shop or station" autocomplete="off"
                        class="w-full border-0 py-3.5 pr-3 pl-11 text-base text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-steel/40">
             </div>
-            <label for="hero-city" class="sr-only">City</label>
-            <select id="hero-city" name="city"
-                    class="border-t-2 border-navy bg-white px-3 py-3.5 text-base text-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-steel/40 sm:w-44 sm:border-t-0 sm:border-l-2">
-                <option value="">Any city</option>
-                @foreach ($places as $place)
-                    <option value="{{ $place->id }}">{{ $place->name }}</option>
+            <label for="hero-region" class="sr-only">Region</label>
+            <select id="hero-region" name="region"
+                    class="border-t-2 border-navy bg-white px-3 py-3.5 text-base text-ink focus:outline-none focus:ring-2 focus:ring-inset focus:ring-steel/40 sm:w-56 sm:border-t-0 sm:border-l-2">
+                <option value="">All of the Philippines</option>
+                @foreach ($regions as $region)
+                    <option value="{{ $region->id }}">{{ $region->label() }}</option>
                 @endforeach
             </select>
             <button type="submit" class="btn-primary !rounded-none px-7 py-3.5 text-base">Search</button>
@@ -96,18 +96,18 @@
     <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div class="flex flex-wrap items-end justify-between gap-3">
             <div>
-                <h2 class="text-4xl">Recently approved</h2>
-                <p class="mt-1.5 text-muted">The newest places an administrator has checked and published.</p>
+                <h2 class="text-4xl">Listed near {{ config('autokonek.home.city') }}</h2>
+                <p class="mt-1.5 text-muted">A few places in {{ config('autokonek.home.province') }}. Use the filters to search the whole Philippines.</p>
             </div>
             <a href="{{ route('establishments.index') }}" class="btn-outline">See all listings</a>
         </div>
 
         @if ($recent->isEmpty())
-            <x-ui.empty-state class="mt-6" icon="building" title="No listings yet" text="Approved establishments will show up here." />
+            <x-ui.empty-state class="mt-6" icon="building" title="No listings yet" text="Listings near {{ config('autokonek.home.city') }} will show up here." />
         @else
             <div class="mt-7 grid gap-5 lg:grid-cols-2">
                 @foreach ($recent as $establishment)
-                    <x-listing.card :establishment="$establishment" />
+                    <x-listing.card :establishment="$establishment" class="anim-rise" :style="'--i: '.$loop->index" />
                 @endforeach
             </div>
         @endif
@@ -127,7 +127,7 @@
             <li>
                 <div class="flex items-center gap-4">
                     <span class="sign size-12 font-display text-3xl font-bold">{{ $index + 1 }}</span>
-                    @unless ($loop->last)<span class="roadline hidden flex-1 md:block"></span>@endunless
+                    @unless ($loop->last)<span class="roadline draw-line hidden flex-1 md:block"></span>@endunless
                 </div>
                 <h3 class="mt-4 text-2xl">{{ $title }}</h3>
                 <p class="mt-1.5 max-w-xs leading-relaxed text-muted">{{ $text }}</p>
@@ -136,16 +136,26 @@
     </ol>
 </section>
 
-{{-- Owner call to action --}}
+{{-- Owner call to action: for visitors who might list a business, and for owners. Not for customers or admins. --}}
+@if (! auth()->check() || auth()->user()->isOwner())
 <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
     <div class="grid items-center gap-10 rounded-lg bg-navy p-8 text-white md:grid-cols-2 md:p-12">
         <div>
-            <h2 class="text-4xl !text-white">Own a shop, station or lot?</h2>
-            <p class="mt-3 max-w-md leading-relaxed text-white/80">Create a free owner account and submit your business. An administrator checks every listing before it goes live, so drivers can trust what they find here.</p>
-            <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ route('register') }}" class="btn-primary btn-lg">List your business</a>
-                <a href="{{ route('about') }}" class="btn btn-lg border border-white/30 text-white hover:bg-white/10">How it works</a>
-            </div>
+            @auth
+                <h2 class="text-4xl !text-white">Have another place to list?</h2>
+                <p class="mt-3 max-w-md leading-relaxed text-white/80">Submit another establishment from your dashboard. An administrator checks every listing before it goes live, so drivers can trust what they find here.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="{{ route('owner.establishments.create') }}" class="btn-primary btn-lg">Add establishment</a>
+                    <a href="{{ route('owner.dashboard') }}" class="btn btn-lg border border-white/30 text-white hover:bg-white/10">My dashboard</a>
+                </div>
+            @else
+                <h2 class="text-4xl !text-white">Own a shop, station or lot?</h2>
+                <p class="mt-3 max-w-md leading-relaxed text-white/80">Create a free owner account and submit your business. An administrator checks every listing before it goes live, so drivers can trust what they find here.</p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="{{ route('register') }}" class="btn-primary btn-lg">List your business</a>
+                    <a href="{{ route('login') }}" class="btn btn-lg border border-white/30 text-white hover:bg-white/10">Owner login</a>
+                </div>
+            @endauth
         </div>
 
         <div class="rounded-md bg-white p-6 text-ink">
@@ -156,4 +166,5 @@
         </div>
     </div>
 </section>
+@endif
 @endsection

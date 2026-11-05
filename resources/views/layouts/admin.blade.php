@@ -32,7 +32,7 @@
         <button type="button" data-toggle="#sidebar" aria-expanded="false" aria-controls="sidebar" class="rounded-sign p-2 text-white hover:bg-white/10" aria-label="Menu"><x-ui.icon name="menu" class="size-6" /></button>
     </div>
 
-    <aside id="sidebar" class="hidden flex-col bg-navy-950 text-white/70 lg:sticky lg:top-0 lg:flex lg:h-screen">
+    <aside id="sidebar" class="anim-menu hidden flex-col bg-navy-950 text-white/70 lg:sticky lg:top-0 lg:flex lg:h-screen">
         <div class="hidden items-center gap-2 px-5 py-5 lg:flex">
             <a href="{{ route('admin.dashboard') }}" aria-label="Admin dashboard"><x-brand.logo :light="true" /></a>
         </div>

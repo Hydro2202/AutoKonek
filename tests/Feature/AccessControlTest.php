@@ -119,4 +119,16 @@ class AccessControlTest extends TestCase
 
         $this->assertSame('pending', Establishment::where('name', 'Sneaky Shop')->value('status'));
     }
+
+    public function test_the_forbidden_page_says_which_account_is_signed_in_and_how_to_switch(): void
+    {
+        $owner = User::factory()->owner()->create(['name' => 'Maria Santos']);
+
+        $this->actingAs($owner)->get(route('admin.reports.index'))
+            ->assertForbidden()
+            ->assertSee('Maria Santos')
+            ->assertSee('Business Owner')
+            ->assertSee('Go to my dashboard')
+            ->assertSee('Log out and switch account');
+    }
 }
