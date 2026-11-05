@@ -1,0 +1,41 @@
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        @apply bg-page font-sans text-base text-ink antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    /* Admin screens use a data-friendly face with tabular figures. */
+    body.admin {
+        @apply font-admin text-[0.9375rem];
+        font-variant-numeric: tabular-nums;
+    }
+
+    h1, h2, h3, h4 {
+        @apply font-display font-semibold text-navy;
+        letter-spacing: 0.005em;
+        line-height: 1.1;
+    }
+
+    body.admin h1, body.admin h2, body.admin h3, body.admin h4 {
+        @apply font-admin font-semibold;
+        letter-spacing: -0.01em;
+        line-height: 1.25;
+    }
+
+    a { @apply transition-colors; }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-steel;
+    }
+
+    ::selection { @apply bg-accent/40; }
+
+    img { @apply bg-steel-50; }
+
+    dialog { color: inherit; }
+}

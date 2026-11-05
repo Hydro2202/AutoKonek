@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Report extends Model
 {
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_RESOLVED = 'resolved';
+
     public const STATUS_DISMISSED = 'dismissed';
 
     public const REASONS = [

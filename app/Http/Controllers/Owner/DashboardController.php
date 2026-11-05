@@ -24,7 +24,7 @@ class DashboardController extends Controller
         $stats['reviews'] = (clone $reviews)->count();
         $stats['average'] = round((float) (clone $reviews)->avg('rating'), 1);
 
-        $establishments = $user->establishments()->with(['category', 'images'])->withRatings()->latest()->get();
+        $establishments = $user->establishments()->with(['category', 'images', 'city.province', 'city.region'])->withRatings()->latest()->get();
         $rejected = $establishments->where('status', Establishment::STATUS_REJECTED);
         $latestReviews = Review::whereIn('establishment_id', $user->establishments()->select('id'))
             ->with(['user', 'establishment'])->latest()->take(5)->get();

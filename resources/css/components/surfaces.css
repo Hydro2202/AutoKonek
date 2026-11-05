@@ -1,0 +1,165 @@
+/* Generic surfaces */
+@utility card { @apply rounded-lg border border-line bg-white; }
+@utility panel { @apply rounded-md border border-line bg-white; }
+
+/* Road "center line": the one decorative motif, used sparingly. */
+@utility roadline { @apply h-0 border-t-2 border-dashed border-accent; }
+
+/*
+| Sign tile: a square pictogram like a road sign, with a thin inner border.
+*/
+@utility sign {
+    @apply inline-flex shrink-0 items-center justify-center rounded-sign bg-navy text-white;
+    box-shadow: inset 0 0 0 2px var(--color-navy), inset 0 0 0 3px rgb(255 255 255 / 0.55);
+}
+
+/*
+| Plate: ratings are shown like a license plate.
+*/
+@utility plate {
+    @apply inline-flex items-center justify-center gap-1 rounded-[5px] bg-white px-2 py-0.5 font-display text-lg leading-none font-bold text-navy;
+    box-shadow: inset 0 0 0 2px var(--color-navy), inset 0 0 0 3.5px #fff, inset 0 0 0 4.5px var(--color-steel);
+    min-width: 3rem;
+    padding-block: 0.3rem;
+}
+
+@utility plate-muted {
+    @apply text-muted;
+    box-shadow: inset 0 0 0 2px var(--color-line-strong), inset 0 0 0 3.5px #fff, inset 0 0 0 4.5px var(--color-line);
+}
+
+/*
+| Ticket: the listing card, shaped like a garage job card with a perforated edge.
+*/
+.ticket {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-line);
+    background: #fff;
+    transition: border-color 0.15s;
+}
+
+.ticket:hover { border-color: var(--color-navy); }
+
+/* An orange marker grows down the left edge on hover or focus. */
+.ticket::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    width: 4px;
+    height: 0;
+    background: var(--color-accent);
+    transition: height 0.22s ease-out;
+}
+
+.ticket:hover::before,
+.ticket:focus-within::before { height: 100%; }
+
+.ticket-media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+}
+
+.ticket-body {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 1rem;
+    border-top: 2px dashed var(--color-line-strong);
+}
+
+@media (min-width: 640px) {
+    .ticket { flex-direction: row; }
+
+    .ticket-media { width: 14rem; flex-shrink: 0; aspect-ratio: auto; min-height: 11rem; }
+
+    .ticket-body { border-top: 0; border-left: 2px dashed var(--color-line-strong); padding: 1.1rem 1.25rem; }
+
+    /* Notches where the ticket would tear. */
+    .ticket-body::before,
+    .ticket-body::after {
+        content: '';
+        position: absolute;
+        left: -9px;
+        width: 16px;
+        height: 16px;
+        border-radius: 9999px;
+        background: var(--color-page);
+        border: 1px solid var(--color-line);
+    }
+
+    .ticket-body::before { top: -9px; }
+    .ticket-body::after { bottom: -9px; }
+}
+
+/* Dotted leader between a service and its price, like a workshop menu board. */
+.leader {
+    flex: 1;
+    min-width: 1rem;
+    margin-bottom: 0.35rem;
+    border-bottom: 2px dotted var(--color-line-strong);
+}
+
+/* Approval track (submitted, in review, live). */
+.track-step {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-muted);
+}
+
+.track-step:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    top: 0.6rem;
+    right: 50%;
+    width: 100%;
+    border-top: 2px solid var(--color-line-strong);
+}
+
+.track-step[data-state='done']:not(:first-child)::before { border-color: var(--color-success); }
+.track-step[data-state='current']:not(:first-child)::before { border-color: var(--color-success); }
+.track-step[data-state='current'][data-tone='warning']:not(:first-child)::before { border-color: var(--color-warning); }
+.track-step[data-state='current'][data-tone='danger']:not(:first-child)::before { border-color: var(--color-danger); }
+
+.track-dot {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 1.25rem;
+    height: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    border: 2px solid var(--color-line-strong);
+    background: #fff;
+    color: #fff;
+}
+
+.track-step[data-state='done'] { color: var(--color-ink); }
+.track-step[data-state='done'] .track-dot { border-color: var(--color-success); background: var(--color-success); }
+.track-step[data-state='current'] { color: var(--color-ink); }
+.track-step[data-state='current'] .track-dot { border-color: var(--color-warning); background: var(--color-warning); }
+.track-step[data-state='current'][data-tone='danger'] .track-dot { border-color: var(--color-danger); background: var(--color-danger); }
+.track-step[data-state='current'][data-tone='success'] .track-dot { border-color: var(--color-success); background: var(--color-success); }
+
+/* Status chip with a leading dot */
+@utility chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
+}
+
+/* Admin KPI delta */
+@utility delta { @apply text-xs font-medium text-muted; }

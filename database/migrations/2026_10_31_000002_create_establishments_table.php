@@ -11,15 +11,18 @@ return new class extends Migration
     {
         Schema::create('establishments', function (Blueprint $table) {
             $table->id();
-            // Deleting an owner removes their listings; a category in use cannot be deleted.
+            // Deleting an owner removes their listings; a category or place in use cannot be deleted.
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('category_id')->constrained()->restrictOnDelete();
+            $table->foreignId('city_id')->constrained('cities')->restrictOnDelete();
             $table->string('name', 150);
             $table->string('slug', 180)->unique();
             $table->text('description');
             $table->string('address', 255);
-            $table->string('city', 100);
-            $table->string('municipality', 100)->nullable();
+            $table->string('barangay', 100)->nullable();
+            // GPS position, used for map directions and "near me" sorting. Optional.
+            $table->decimal('latitude', 9, 6)->nullable();
+            $table->decimal('longitude', 9, 6)->nullable();
             $table->string('contact_number', 30)->nullable();
             $table->string('contact_email')->nullable();
             $table->text('opening_hours')->nullable();
@@ -28,10 +31,12 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['status', 'category_id']);
-            $table->index('city');
+            $table->index('city_id');
         });
 
         DB::statement("ALTER TABLE establishments ADD CONSTRAINT establishments_status_check CHECK (status IN ('pending', 'approved', 'rejected'))");
+        // Latitude and longitude are saved together, and must be real coordinates.
+        DB::statement('ALTER TABLE establishments ADD CONSTRAINT establishments_coordinates_check CHECK ((latitude IS NULL AND longitude IS NULL) OR (latitude IS NOT NULL AND longitude IS NOT NULL AND latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180))');
     }
 
     public function down(): void

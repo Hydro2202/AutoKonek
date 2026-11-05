@@ -97,7 +97,7 @@ class ApprovalTest extends TestCase
         $owner = User::factory()->owner()->create();
 
         $this->actingAs($owner)->post(route('owner.establishments.store'), ['name' => '', 'category_id' => 9999])
-            ->assertSessionHasErrors(['name', 'category_id', 'description', 'address', 'city']);
+            ->assertSessionHasErrors(['name', 'category_id', 'description', 'address', 'city_id']);
 
         $this->assertDatabaseCount('establishments', 0);
     }
@@ -106,7 +106,7 @@ class ApprovalTest extends TestCase
     {
         return array_merge([
             'category_id' => $e->category_id, 'name' => $e->name, 'description' => $e->description,
-            'address' => $e->address, 'city' => $e->city, 'municipality' => $e->municipality,
+            'address' => $e->address, 'city_id' => $e->city_id, 'barangay' => $e->barangay,
             'contact_number' => $e->contact_number, 'contact_email' => $e->contact_email, 'opening_hours' => $e->opening_hours,
         ], $overrides);
     }

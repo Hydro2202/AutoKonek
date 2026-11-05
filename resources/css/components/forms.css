@@ -1,0 +1,22 @@
+@utility label { @apply mb-1.5 block text-sm font-semibold text-ink; }
+
+@utility input {
+    @apply block w-full rounded-sign border border-line-strong bg-white px-3 py-2 text-[0.9375rem] text-ink transition-[border-color,box-shadow] duration-150;
+    @apply placeholder:text-muted/80 hover:border-steel focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/15;
+}
+
+@utility input-error { @apply border-danger-700 focus:border-danger-700 focus:ring-danger-700/15; }
+@utility hint { @apply mt-1.5 text-[0.8125rem] text-muted; }
+@utility error-text { @apply mt-1.5 text-[0.8125rem] font-medium text-danger-700; }
+
+/* Native checkbox and radio get the brand color. */
+input[type='checkbox'],
+input[type='radio'] {
+    accent-color: var(--color-navy);
+}
+
+/* File inputs */
+@utility file-input {
+    @apply block w-full cursor-pointer rounded-sign border border-dashed border-line-strong bg-white p-3 text-sm text-muted transition-colors hover:border-navy;
+    @apply file:mr-3 file:cursor-pointer file:rounded-sign file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white hover:file:bg-navy-700;
+}

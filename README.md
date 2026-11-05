@@ -146,18 +146,63 @@ The demo establishments (for example "Demo Sparkle Car Wash") are **fictional** 
 
 This has been checked by automated tests, but no automated test suite proves an application is completely secure.
 
+## Legal pages and cookies
+
+- **Privacy Policy** (`/privacy`), **Terms of Service** (`/terms`) and **Cookie Policy** (`/cookies`) are linked from the footer, the sign-up form and the auth pages.
+- Registration requires ticking the box that accepts the Terms and Privacy Policy.
+- A **cookie banner** appears on first visit. AutoKonek sets only essential cookies (login session, form security token, an optional "remember me" cookie, and the banner choice itself), so the banner records an acknowledgement. "Cookie settings" in the footer reopens it so the choice can be withdrawn. Fonts are bundled by Vite and served from the app, so no third party sets cookies.
+- There is no Refund Policy because AutoKonek takes no payments (the Terms say so).
+- The "last updated" date and contact email come from `config/autokonek.php` and `AUTOKONEK_CONTACT_EMAIL` in `.env`.
+- These pages are a reasonable starting point written for this project's real behavior, not legal advice. Have a qualified person review them before using AutoKonek for real.
+
+## Places, maps and GPS
+
+AutoKonek is based in **Lucena City, Quezon** (change it in `config/autokonek.php`). Everything is built for the Philippines:
+
+- **Official places.** `php artisan migrate --seed` loads every region, province, city and municipality from `database/data/ph-locations.json`: 17 regions, 81 provinces and 1,634 cities and municipalities (146 flagged as cities). The data comes from the Philippine Standard Geographic Code (PSA) and is a snapshot, so recently created cities may be missing. Re-running `php artisan db:seed --class=PhilippineLocationSeeder` is safe.
+- **Structured location.** A listing stores its city (which determines its province and region), an optional barangay, and the street address. Owners pick the place with region, province and city selectors; Metro Manila has no provinces, so its cities are listed directly. New listings start in Lucena City.
+- **Browse by place.** `/places` lists every region with its cities (or every city and municipality), with listing counts. The directory can be filtered by region, province and city.
+- **Directions.** Each listing has "Get directions" (Google Maps), "Open in Waze" and "OpenStreetMap" buttons. They are plain links, so no map API key is needed. Listings with a GPS pin send the exact position; others search the address.
+- **Map.** The OpenStreetMap map on a listing page loads only after the visitor presses "Show map", so opening a page contacts no third party.
+- **GPS.** "Near me" in the directory asks the browser for the visitor's position and sorts by distance (straight-line distance, calculated in PostgreSQL). "How far is it?" on a listing is calculated in the browser. Owners can fill in their business's latitude and longitude with "Use my current location". Browsers require HTTPS (or `localhost`) for location access.
+
+## Page transitions
+
+When a link is clicked, a car drives along a road past roadside place signs and keeps going once the next page has loaded. It runs for every link in the public site, owner area and admin area, and is skipped for visitors who prefer reduced motion. The code is in `resources/js/modules/route-transition.js` and `resources/css/components/transition.css`.
+
+## Design system
+
+Road-signage and workshop vocabulary: navy asphalt, one orange "center line", square sign tiles, license-plate ratings and job-card listing tickets. Headings use Barlow Condensed, body text Barlow, and the admin area IBM Plex Sans. Design tokens live in `resources/css/theme.css`. Motion is limited to the homepage service board, toasts, the cookie banner, dialogs and button loading states, and it is switched off for visitors who prefer reduced motion.
+
 ## Project structure
 
 ```
-app/Http/Controllers/        Public, Owner/ and Admin/ controllers
-app/Http/Middleware/         EnsureRole, EnsureUserIsActive
-app/Http/Requests/           EstablishmentRequest
-app/Models/                  User, Category, Establishment, Service, EstablishmentImage, Review, Report, ContactMessage
-app/Policies/                EstablishmentPolicy, ReviewPolicy
-database/migrations|seeders|factories
-resources/views/             layouts/, components/, partials/, owner/, admin/, ...
-resources/css/app.css        Tailwind theme and component classes
-tests/Feature/               Automated tests
+app/
+  Http/Controllers/
+    Auth/        LoginController, RegisterController
+    Account/     DashboardController (role redirect), ProfileController
+    Site/        HomeController, EstablishmentController (directory), LocationController (places), ContactController
+    Customer/    ReviewController, ReportController, ActivityController
+    Owner/       Dashboard, Establishment, Service, Image, Review controllers
+    Admin/       Dashboard, User, Establishment, Category, Review, Report, Message controllers
+  Http/Middleware/   EnsureRole, EnsureUserIsActive
+  Http/Requests/     Form requests grouped like the controllers (Auth, Account, Customer, Owner, Admin, Site)
+  Models/            User, Category, Establishment, Service, EstablishmentImage, Review, Report, ContactMessage, Region, Province, City
+  Policies/          EstablishmentPolicy, ReviewPolicy
+  Services/          ListingApprovalService (approval rules), EstablishmentImageService (uploads), LocationLookup (place lists)
+  Support/           MapLinks (directions and map links)
+  View/Composers/    AdminSidebarComposer (live counters)
+config/autokonek.php   App-specific settings (contact email, legal date, image limits, page sizes)
+database/            migrations, seeders, factories
+routes/web.php       Loads routes/web/{site,auth,account,owner,admin}.php
+resources/
+  css/               app.css imports theme.css, base.css and components/*.css
+  js/                app.js imports small modules from js/modules/
+  views/
+    layouts/         base, site, auth, owner, admin
+    components/      ui/, form/, listing/, layout/, panel/, legal/, brand/
+    site/ auth/ account/ customer/ owner/ admin/ legal/
+tests/Feature/       Automated tests
 ```
 
 ## Troubleshooting

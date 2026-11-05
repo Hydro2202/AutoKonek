@@ -1,0 +1,64 @@
+/*
+| Motion is used only where it explains something:
+|  - the service board flips its counts once when the homepage loads,
+|  - toasts, the cookie banner and dialogs enter from where they belong,
+|  - buttons show a road-line while a form is sending.
+| Nothing animates on scroll, and everything is off for visitors who prefer reduced motion.
+*/
+@keyframes flap {
+    from { transform: rotateX(-80deg); opacity: 0.4; }
+    to { transform: rotateX(0); opacity: 1; }
+}
+
+@keyframes toast-in {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes banner-in {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes road {
+    from { transform: translateX(0); }
+    to { transform: translateX(16px); }
+}
+
+/* Split-flap digit cell on the homepage service board. */
+.flap-cell {
+    position: relative;
+    display: inline-block;
+    min-width: 1.35rem;
+    border-radius: 3px;
+    background: var(--color-navy-800);
+    padding: 0.1rem 0.15rem;
+    text-align: center;
+    perspective: 200px;
+}
+
+.flap-cell::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 1px;
+    background: rgb(0 0 0 / 0.55);
+}
+
+.flap-cell.is-flipping { animation: var(--animate-flap); transform-origin: 50% 100%; }
+
+/* Dialogs scale in from the center. */
+dialog[open] { animation: toast-in 0.2s ease-out; }
+dialog::backdrop { background: rgb(10 24 40 / 0.55); }
+
+.toast-leave { opacity: 0; transform: translateY(8px); transition: opacity 0.2s, transform 0.2s; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}

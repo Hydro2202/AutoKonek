@@ -1,21 +1,24 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('title', 'Log in')
 
-@section('content')
-<div class="mx-auto max-w-md px-4 py-12 sm:py-16">
-    <div class="card p-6 sm:p-8">
-        <h1 class="text-2xl">Welcome back</h1>
-        <p class="mt-1 text-sm text-muted">Log in to your AutoKonek account.</p>
+@section('panel-title', 'Welcome back on the road.')
+@section('panel-text', 'Log in to review places you visited or to manage the listings you own.')
+@section('panel-points')
+    <li class="flex items-center gap-3"><x-ui.icon name="star" class="size-5 text-accent" /> Rate and review the places you used</li>
+    <li class="flex items-center gap-3"><x-ui.icon name="building" class="size-5 text-accent" /> Update your business listing</li>
+    <li class="flex items-center gap-3"><x-ui.icon name="flag" class="size-5 text-accent" /> Report anything that looks wrong</li>
+@endsection
 
-        <form method="POST" action="{{ route('login') }}" class="mt-6 space-y-4">
-            @csrf
-            <x-input name="email" type="email" label="Email" required autocomplete="email" autofocus />
-            <x-input name="password" type="password" label="Password" required autocomplete="current-password" />
-            <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="remember" class="rounded border-line"> Remember me</label>
-            <button type="submit" class="btn-primary w-full py-2.5">Log in</button>
-        </form>
-        <p class="mt-5 text-center text-sm text-muted">New here? <a href="{{ route('register') }}" class="font-semibold text-steel hover:underline">Create an account</a></p>
-    </div>
-</div>
+@section('content')
+<h1 class="text-5xl">Log in</h1>
+<p class="mt-2 text-muted">New to AutoKonek? <a href="{{ route('register') }}" class="font-semibold text-steel underline underline-offset-2">Create an account</a></p>
+
+<form method="POST" action="{{ route('login') }}" class="mt-8 space-y-5">
+    @csrf
+    <x-form.input name="email" type="email" label="Email" required autocomplete="email" autofocus />
+    <x-form.input name="password" type="password" label="Password" required autocomplete="current-password" />
+    <x-form.checkbox name="remember">Keep me signed in on this device</x-form.checkbox>
+    <button type="submit" class="btn-primary btn-lg w-full">Log in</button>
+</form>
 @endsection

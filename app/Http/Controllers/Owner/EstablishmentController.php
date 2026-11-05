@@ -3,27 +3,44 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\EstablishmentRequest;
+use App\Http\Requests\Owner\EstablishmentRequest;
 use App\Models\Category;
 use App\Models\Establishment;
+use App\Services\EstablishmentImageService;
+use App\Services\ListingApprovalService;
+use App\Services\LocationLookup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\View;
 
 class EstablishmentController extends Controller
 {
-    public function index()
+    public function __construct(
+        private readonly EstablishmentImageService $images,
+        private readonly ListingApprovalService $approval,
+        private readonly LocationLookup $locations,
+    ) {}
+
+    public function index(): View
     {
         $establishments = auth()->user()->establishments()
-            ->with(['category', 'images'])->withRatings()->latest()->paginate(10);
+            ->with(['category', 'images', 'city.province', 'city.region'])->withRatings()->latest()
+            ->paginate(config('autokonek.pagination.owner'));
 
         return view('owner.establishments.index', compact('establishments'));
     }
 
-    public function create()
+    public function create(): View
     {
         return view('owner.establishments.create', [
             'categories' => Category::active()->orderBy('id')->get(),
+            // A new listing starts at the home city (Lucena City) unless the form was already filled in.
+            'location' => $this->locations->forSelection(
+                old('region_id') ?: null,
+                old('province_id') ?: null,
+                old('city_id') ?: $this->locations->defaultCityId(),
+            ),
         ]);
     }
 
@@ -36,7 +53,7 @@ class EstablishmentController extends Controller
             $establishment->status = Establishment::STATUS_PENDING; // always starts as pending
             $establishment->save();
 
-            ImageController::saveUploads($establishment, $request->file('images', []));
+            $this->images->store($establishment, $request->file('images', []));
 
             return $establishment;
         });
@@ -45,43 +62,31 @@ class EstablishmentController extends Controller
             ->with('success', 'Your establishment was submitted for approval. Add your services below while you wait.');
     }
 
-    public function edit(Establishment $establishment)
+    public function edit(Establishment $establishment): View
     {
         Gate::authorize('manage', $establishment);
 
         return view('owner.establishments.edit', [
             'establishment' => $establishment->load('category'),
             'categories' => Category::active()->orWhere('id', $establishment->category_id)->orderBy('id')->get(),
+            'location' => $this->locations->forSelection(
+                old('region_id') ?: null,
+                old('province_id') ?: null,
+                old('city_id') ?: $establishment->city_id,
+            ),
         ]);
     }
 
-    /**
-     * Approval policy:
-     *  - Editing an APPROVED listing's details sends it back to PENDING, so changes are re-checked.
-     *    (Services and images can be changed freely without re-approval.)
-     *  - Editing a REJECTED listing resubmits it as PENDING and clears the rejection reason.
-     *  - A listing that is already PENDING stays pending.
-     */
     public function update(EstablishmentRequest $request, Establishment $establishment): RedirectResponse
     {
         Gate::authorize('manage', $establishment);
 
-        $message = 'Establishment updated.';
-
-        DB::transaction(function () use ($request, $establishment, &$message) {
+        $message = DB::transaction(function () use ($request, $establishment) {
             $establishment->fill($request->safe()->only(Establishment::LISTING_FIELDS));
+            $message = $this->approval->saveOwnerEdit($establishment);
+            $this->images->store($establishment, $request->file('images', []));
 
-            if ($establishment->status === Establishment::STATUS_REJECTED) {
-                $establishment->status = Establishment::STATUS_PENDING;
-                $establishment->rejection_reason = null;
-                $message = 'Your corrections were saved and the listing has been resubmitted for approval.';
-            } elseif ($establishment->status === Establishment::STATUS_APPROVED && $establishment->isDirty()) {
-                $establishment->status = Establishment::STATUS_PENDING;
-                $message = 'Changes saved. Because this listing was already approved, it is hidden from the public until an administrator approves the changes.';
-            }
-
-            $establishment->save();
-            ImageController::saveUploads($establishment, $request->file('images', []));
+            return $message;
         });
 
         return redirect()->route('owner.establishments.index')->with('success', $message);
@@ -91,7 +96,7 @@ class EstablishmentController extends Controller
     {
         Gate::authorize('manage', $establishment);
 
-        $establishment->load('images')->deleteImageFiles();
+        $this->images->deleteAllFiles($establishment->load('images'));
         $establishment->delete();
 
         return redirect()->route('owner.establishments.index')->with('success', 'Establishment deleted.');

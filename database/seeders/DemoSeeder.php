@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\City;
 use App\Models\Establishment;
 use App\Models\Report;
 use App\Models\Review;
@@ -11,8 +12,9 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Clearly fictional demonstration data. Local development only.
- * All demo accounts use the password "password".
+ * Clearly fictional demonstration data around Lucena City and the rest of Quezon province.
+ * Local development only. All demo accounts use the password "password".
+ * Run PhilippineLocationSeeder and CategorySeeder first.
  */
 class DemoSeeder extends Seeder
 {
@@ -40,28 +42,31 @@ class DemoSeeder extends Seeder
         ])->map(fn ($c) => $makeUser($c[0], $c[1], User::ROLE_CUSTOMER));
 
         $cat = fn (string $slug) => Category::where('slug', $slug)->firstOrFail()->id;
+        $city = fn (string $name) => City::where('name', $name)->whereHas('province', fn ($q) => $q->where('name', 'Quezon'))->firstOrFail()->id;
 
-        // [owner, category slug, name, city, municipality, address, description, status, services]
+        // Each row: owner, category, name, city, barangay, address, description, status, services, latitude, longitude.
+        // Coordinates are approximate and only meant for the map demo; the businesses are fictional.
         $rows = [
-            [$owner1, 'gas-stations', 'Sample Fuel Stop Alpha', 'Cebu City', 'Mabolo', '12 Demo Highway', 'A fictional 24-hour fuel station with unleaded, diesel and a small convenience counter.', 'approved', [['Unleaded Gasoline (per liter)', 61.50], ['Diesel (per liter)', 55.20], ['Tire Inflation', null]]],
-            [$owner1, 'car-wash', 'Demo Sparkle Car Wash', 'Cebu City', 'Lahug', '45 Sample Street', 'A fictional hand-wash and detailing shop offering quick exterior and full interior cleaning.', 'approved', [['Exterior Wash', 150], ['Full Interior Vacuum', 250], ['Wax and Polish', 800]]],
-            [$owner1, 'auto-repair', 'Example Motors Repair Bay', 'Mandaue City', 'Subangdako', '8 Placeholder Avenue', 'A fictional repair shop for oil changes, brake service and engine diagnostics.', 'approved', [['Change Oil', 900], ['Brake Pad Replacement', 1800], ['Computerized Diagnostics', 600]]],
-            [$owner1, 'tire-and-vulcanizing-shops', 'Fictional Tire Hub', 'Lapu-Lapu City', 'Pajo', '21 Mock Road', 'A fictional tire shop offering vulcanizing, balancing and new tire installation.', 'approved', [['Tire Patch', 100], ['Wheel Balancing', 350], ['Tire Installation', 200]]],
-            [$owner2, 'parking-facilities', 'Demo Covered Parking', 'Cebu City', 'Capitol Site', '3 Imaginary Plaza', 'A fictional covered parking building with 24-hour security and hourly rates.', 'approved', [['Hourly Rate', 40], ['Overnight Parking', 250]]],
-            [$owner2, 'battery-services', 'Sample Power Cell Center', 'Talisay City', 'Bulacao', '17 Test Lane', 'A fictional battery shop that tests, charges and replaces car batteries on-site.', 'approved', [['Battery Test', null], ['Battery Charging', 150], ['Battery Replacement (labor)', 200]]],
-            [$owner2, 'auto-repair', 'Placeholder Auto Clinic', 'Mandaue City', 'Centro', '90 Sample Boulevard', 'A fictional shop offering aircon repair, tune-ups and general maintenance.', 'approved', [['Aircon Cleaning', 1200], ['Tune-Up', 1500]]],
-            [$owner2, 'gas-stations', 'Mock Gas and Go', 'Lapu-Lapu City', 'Basak', '5 Fiction Street', 'A fictional roadside gas station with a small snack counter.', 'approved', [['Unleaded Gasoline (per liter)', 61.00], ['LPG Refill', 850]]],
-            [$owner1, 'car-wash', 'Pending Shine Studio', 'Cebu City', 'Banilad', '77 Draft Street', 'A fictional new car wash waiting for administrator approval.', 'pending', [['Basic Wash', 120]]],
-            [$owner2, 'tire-and-vulcanizing-shops', 'Pending Roll Express', 'Talisay City', 'Poblacion', '14 Queue Road', 'A fictional tire shop submitted for review.', 'pending', [['Tire Patch', 90]]],
-            [$owner2, 'parking-facilities', 'Rejected Lot Sample', 'Cebu City', null, 'Unknown', 'Parking lot listing.', 'rejected', []],
+            [$owner1, 'gas-stations', 'Sample Fuel Stop Alpha', 'Lucena City', 'Ilayang Dupay', 'Maharlika Highway, Quezon Avenue corner', 'A fictional 24-hour fuel station with unleaded, diesel and a small convenience counter.', 'approved', [['Unleaded Gasoline (per liter)', 61.50], ['Diesel (per liter)', 55.20], ['Tire Inflation', null]], 13.9376, 121.6191],
+            [$owner1, 'car-wash', 'Demo Sparkle Car Wash', 'Lucena City', 'Ibabang Dupay', 'Diversion Road', 'A fictional hand-wash and detailing shop offering quick exterior and full interior cleaning.', 'approved', [['Exterior Wash', 150], ['Full Interior Vacuum', 250], ['Wax and Polish', 800]], 13.9442, 121.6148],
+            [$owner1, 'auto-repair', 'Example Motors Repair Bay', 'Lucena City', 'Gulang-gulang', 'Quezon Avenue', 'A fictional repair shop for oil changes, brake service and engine diagnostics.', 'approved', [['Change Oil', 900], ['Brake Pad Replacement', 1800], ['Computerized Diagnostics', 600]], 13.9331, 121.6269],
+            [$owner1, 'tire-and-vulcanizing-shops', 'Fictional Tire Hub', 'Tayabas City', 'Poblacion', 'Maharlika Highway', 'A fictional tire shop offering vulcanizing, balancing and new tire installation.', 'approved', [['Tire Patch', 100], ['Wheel Balancing', 350], ['Tire Installation', 200]], 14.0269, 121.5931],
+            [$owner2, 'parking-facilities', 'Demo Covered Parking', 'Lucena City', 'Barra', 'Merchan Street', 'A fictional covered parking building with 24-hour security and hourly rates.', 'approved', [['Hourly Rate', 40], ['Overnight Parking', 250]], 13.9319, 121.6177],
+            [$owner2, 'battery-services', 'Sample Power Cell Center', 'Sariaya', 'Poblacion', 'Maharlika Highway', 'A fictional battery shop that tests, charges and replaces car batteries on-site.', 'approved', [['Battery Test', null], ['Battery Charging', 150], ['Battery Replacement (labor)', 200]], 13.9631, 121.5268],
+            [$owner2, 'auto-repair', 'Placeholder Auto Clinic', 'Candelaria', 'Masin Sur', 'Maharlika Highway', 'A fictional shop offering aircon repair, tune-ups and general maintenance.', 'approved', [['Aircon Cleaning', 1200], ['Tune-Up', 1500]], 13.9291, 121.4238],
+            [$owner2, 'gas-stations', 'Mock Gas and Go', 'Pagbilao', 'Ibabang Palsabangon', 'Maharlika Highway', 'A fictional roadside gas station with a small snack counter.', 'approved', [['Unleaded Gasoline (per liter)', 61.00], ['LPG Refill', 850]], 13.9731, 121.6812],
+            [$owner1, 'car-wash', 'Pending Shine Studio', 'Lucena City', 'Isabang', 'Lucena-Tayabas Road', 'A fictional new car wash waiting for administrator approval.', 'pending', [['Basic Wash', 120]], 13.9514, 121.6226],
+            [$owner2, 'tire-and-vulcanizing-shops', 'Pending Roll Express', 'Lucban', 'Poblacion', 'Quezon Avenue', 'A fictional tire shop submitted for review.', 'pending', [['Tire Patch', 90]], 14.1136, 121.5562],
+            [$owner2, 'parking-facilities', 'Rejected Lot Sample', 'Tiaong', null, 'Unknown', 'Parking lot listing.', 'rejected', [], null, null],
         ];
 
         $establishments = collect();
-        foreach ($rows as [$owner, $slug, $name, $city, $muni, $address, $desc, $status, $services]) {
+        foreach ($rows as [$owner, $slug, $name, $cityName, $barangay, $address, $desc, $status, $services, $lat, $lng]) {
             $e = new Establishment;
             $e->fill([
                 'category_id' => $cat($slug), 'name' => $name, 'description' => $desc,
-                'address' => $address, 'city' => $city, 'municipality' => $muni,
+                'address' => $address, 'city_id' => $city($cityName), 'barangay' => $barangay,
+                'latitude' => $lat, 'longitude' => $lng,
                 'contact_number' => '0917'.rand(1000000, 9999999),
                 'opening_hours' => "Mon-Sat: 8:00 AM - 6:00 PM\nSun: 9:00 AM - 3:00 PM",
             ]);

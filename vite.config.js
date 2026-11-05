@@ -8,10 +8,11 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
+            // Downloaded at build time and served from this app (no third-party requests for visitors).
             fonts: [
-                bunny('Manrope', {
-                    weights: [400, 500, 600, 700, 800],
-                }),
+                bunny('Barlow', { weights: [400, 500, 600, 700] }),
+                bunny('Barlow Condensed', { weights: [500, 600, 700] }),
+                bunny('IBM Plex Sans', { weights: [400, 500, 600] }),
             ],
         }),
         tailwindcss(),

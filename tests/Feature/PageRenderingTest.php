@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Establishment;
 use App\Models\Report;
 use App\Models\Review;
@@ -9,6 +10,7 @@ use App\Models\Service;
 use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\DemoSeeder;
+use Database\Seeders\PhilippineLocationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +22,7 @@ class PageRenderingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed([CategorySeeder::class, DemoSeeder::class]);
+        $this->seed([PhilippineLocationSeeder::class, CategorySeeder::class, DemoSeeder::class]);
     }
 
     public function test_public_and_customer_pages_render(): void
@@ -28,7 +30,7 @@ class PageRenderingTest extends TestCase
         $e = Establishment::approved()->first();
         $review = Review::first();
 
-        foreach ([route('home'), route('establishments.index'), route('establishments.show', $e), route('about'), route('contact')] as $url) {
+        foreach ([route('home'), route('establishments.index'), route('establishments.show', $e), route('about'), route('contact'), route('places.index'), route('places.index', ['show' => 'all'])] as $url) {
             $this->get($url)->assertOk();
         }
 
@@ -98,7 +100,7 @@ class PageRenderingTest extends TestCase
 
     public function test_demo_data_matches_the_brief(): void
     {
-        $this->assertSame(6, \App\Models\Category::count());
+        $this->assertSame(6, Category::count());
         $this->assertSame(2, User::where('role', 'business_owner')->count());
         $this->assertGreaterThanOrEqual(3, User::where('role', 'customer')->count());
         $this->assertGreaterThan(0, Establishment::where('status', 'pending')->count());

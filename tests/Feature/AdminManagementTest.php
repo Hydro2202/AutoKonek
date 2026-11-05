@@ -55,7 +55,7 @@ class AdminManagementTest extends TestCase
         $this->actingAs($admin)->put(route('admin.categories.update', $category), ['name' => 'Towing and Recovery']);
         $this->assertSame('towing-and-recovery', $category->fresh()->slug);
 
-        $this->actingAs($admin)->put(route('admin.categories.update', $category), ['toggle' => 1]);
+        $this->actingAs($admin)->patch(route('admin.categories.toggle', $category));
         $this->assertFalse($category->fresh()->is_active);
     }
 
@@ -98,7 +98,7 @@ class AdminManagementTest extends TestCase
     public function test_registration_and_login_work(): void
     {
         $this->post(route('register'), [
-            'name' => 'Ana Cruz', 'email' => 'ana@example.com', 'account_type' => 'business_owner',
+            'name' => 'Ana Cruz', 'email' => 'ana@example.com', 'account_type' => 'business_owner', 'terms' => '1',
             'password' => 'password123', 'password_confirmation' => 'password123',
         ])->assertRedirect(route('dashboard'));
 

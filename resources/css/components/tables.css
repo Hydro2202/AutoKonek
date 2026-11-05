@@ -1,0 +1,14 @@
+/* Data tables (owner and admin). */
+@utility table-wrap { @apply overflow-x-auto rounded-md border border-line bg-white; }
+
+@utility table {
+    @apply w-full border-collapse text-left text-sm;
+
+    & thead th {
+        @apply sticky top-0 border-b border-line bg-steel-50 px-4 py-2.5 text-xs font-semibold whitespace-nowrap text-muted;
+    }
+
+    & tbody td { @apply border-b border-line px-4 py-3 align-middle; }
+    & tbody tr:last-child td { @apply border-b-0; }
+    & tbody tr { @apply transition-colors hover:bg-steel-50/60; }
+}

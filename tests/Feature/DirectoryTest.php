@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\City;
 use App\Models\Establishment;
 use App\Models\Review;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -44,13 +45,15 @@ class DirectoryTest extends TestCase
         $wash = Category::factory()->create(['name' => 'Car Wash', 'slug' => 'car-wash']);
         $gas = Category::factory()->create(['name' => 'Gas Stations', 'slug' => 'gas-stations']);
 
-        Establishment::factory()->create(['name' => 'Sparkle Wash', 'category_id' => $wash->id, 'city' => 'Cebu City']);
-        Establishment::factory()->create(['name' => 'Fuel Corner', 'category_id' => $gas->id, 'city' => 'Mandaue City']);
+        $lucena = City::factory()->create(['name' => 'Lucena City']);
+        $tayabas = City::factory()->create(['name' => 'Tayabas City']);
+        Establishment::factory()->create(['name' => 'Sparkle Wash', 'category_id' => $wash->id, 'city_id' => $lucena->id]);
+        Establishment::factory()->create(['name' => 'Fuel Corner', 'category_id' => $gas->id, 'city_id' => $tayabas->id]);
 
         $this->get(route('establishments.index', ['category' => 'car-wash']))
             ->assertSee('Sparkle Wash')->assertDontSee('Fuel Corner');
 
-        $this->get(route('establishments.index', ['city' => 'Mandaue City']))
+        $this->get(route('establishments.index', ['city' => $tayabas->id]))
             ->assertSee('Fuel Corner')->assertDontSee('Sparkle Wash');
 
         $this->get(route('categories.show', $gas))->assertRedirect(route('establishments.index', ['category' => 'gas-stations']));

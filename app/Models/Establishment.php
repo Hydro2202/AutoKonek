@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\MapLinks;
 use Database\Factories\EstablishmentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Establishment extends Model
@@ -17,7 +17,9 @@ class Establishment extends Model
     use HasFactory;
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
 
     /**
@@ -25,11 +27,19 @@ class Establishment extends Model
      * are NOT fillable so an owner can never approve their own listing.
      */
     public const LISTING_FIELDS = [
-        'category_id', 'name', 'description', 'address', 'city',
-        'municipality', 'contact_number', 'contact_email', 'opening_hours',
+        'category_id', 'name', 'description', 'address', 'city_id', 'barangay',
+        'latitude', 'longitude', 'contact_number', 'contact_email', 'opening_hours',
     ];
 
     protected $fillable = self::LISTING_FIELDS;
+
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'decimal:6',
+            'longitude' => 'decimal:6',
+        ];
+    }
 
     public function getRouteKeyName(): string
     {
@@ -44,6 +54,11 @@ class Establishment extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
     }
 
     public function services(): HasMany
@@ -97,6 +112,33 @@ class Establishment extends Model
             ->orWhere('address', 'ilike', $like));
     }
 
+    /** Filter by the place the business is in. Any combination of region, province and city. */
+    public function scopeInPlace(Builder $query, ?int $regionId, ?int $provinceId, ?int $cityId): Builder
+    {
+        return $query
+            ->when($cityId, fn (Builder $q) => $q->where('city_id', $cityId))
+            ->when($provinceId && ! $cityId, fn (Builder $q) => $q->whereHas('city', fn (Builder $c) => $c->where('province_id', $provinceId)))
+            ->when($regionId && ! $provinceId && ! $cityId, fn (Builder $q) => $q->whereHas('city', fn (Builder $c) => $c->where('region_id', $regionId)));
+    }
+
+    /**
+     * Adds a "distance_km" column (straight-line, haversine formula) from the given point.
+     * Listings without coordinates get NULL and are sorted last.
+     */
+    public function scopeWithDistanceFrom(Builder $query, float $latitude, float $longitude): Builder
+    {
+        $earthRadiusKm = 6371;
+
+        return $query->addSelect(['distance_km' => fn ($sub) => $sub->selectRaw(
+            "CASE WHEN establishments.latitude IS NULL THEN NULL ELSE {$earthRadiusKm} * 2 * asin(sqrt(
+                power(sin(radians(establishments.latitude - ?) / 2), 2) +
+                cos(radians(?)) * cos(radians(establishments.latitude)) *
+                power(sin(radians(establishments.longitude - ?) / 2), 2)
+            )) END",
+            [$latitude, $latitude, $longitude]
+        )]);
+    }
+
     public function averageRating(): float
     {
         return round((float) ($this->reviews_avg_rating ?? $this->reviews()->avg('rating') ?? 0), 1);
@@ -107,10 +149,24 @@ class Establishment extends Model
         return (int) ($this->reviews_count ?? $this->reviews()->count());
     }
 
-    /** Short "City, Municipality" label. */
+    public function hasCoordinates(): bool
+    {
+        return $this->latitude !== null && $this->longitude !== null;
+    }
+
+    public function mapLinks(): MapLinks
+    {
+        return MapLinks::for($this);
+    }
+
+    /** For example "Brgy. Ibabang Dupay, Lucena City, Quezon". */
     public function locationLabel(): string
     {
-        return collect([$this->municipality, $this->city])->filter()->unique()->implode(', ');
+        return collect([
+            filled($this->barangay) ? 'Brgy. '.$this->barangay : null,
+            $this->city?->name,
+            $this->city?->areaName(),
+        ])->filter()->implode(', ');
     }
 
     /** Primary uploaded image, or a local category placeholder. */
@@ -132,13 +188,5 @@ class Establishment extends Model
         }
 
         return $slug;
-    }
-
-    /** Remove files from disk for all images (rows go with the cascade). */
-    public function deleteImageFiles(): void
-    {
-        foreach ($this->images as $image) {
-            Storage::disk('public')->delete($image->image_path);
-        }
     }
 }

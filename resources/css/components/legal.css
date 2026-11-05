@@ -1,0 +1,16 @@
+/* Long-form text for the legal pages. */
+.doc { max-width: 68ch; }
+
+.doc h2 {
+    @apply mt-10 scroll-mt-24 border-t border-line pt-6 text-2xl first:mt-0 first:border-0 first:pt-0;
+}
+
+.doc h3 { @apply mt-6 text-lg; }
+.doc p { @apply mt-3 leading-7 text-ink/90; }
+.doc ul { @apply mt-3 list-disc space-y-1.5 pl-5 leading-7 text-ink/90; }
+.doc a { @apply font-semibold text-steel underline underline-offset-2 hover:text-navy; }
+.doc strong { @apply font-semibold text-ink; }
+
+.doc table { @apply mt-4 w-full border-collapse text-left text-sm; }
+.doc th { @apply border-b-2 border-navy px-3 py-2 font-semibold text-navy; }
+.doc td { @apply border-b border-line px-3 py-2.5 align-top; }

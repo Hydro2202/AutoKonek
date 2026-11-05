@@ -14,7 +14,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_CUSTOMER = 'customer';
+
     public const ROLE_OWNER = 'business_owner';
+
     public const ROLE_ADMIN = 'admin';
 
     // "role" and "is_active" are intentionally NOT fillable, so a request can never set them.

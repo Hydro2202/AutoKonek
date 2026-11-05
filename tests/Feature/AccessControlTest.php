@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\City;
 use App\Models\Establishment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -53,7 +54,7 @@ class AccessControlTest extends TestCase
         $this->actingAs($owner)->get(route('owner.establishments.edit', $other))->assertForbidden();
         $this->actingAs($owner)->put(route('owner.establishments.update', $other), [
             'category_id' => $other->category_id, 'name' => 'Hacked', 'description' => str_repeat('x', 30),
-            'address' => 'x', 'city' => 'x',
+            'address' => 'x', 'city_id' => $other->city_id,
         ])->assertForbidden();
         $this->actingAs($owner)->delete(route('owner.establishments.destroy', $other))->assertForbidden();
         $this->actingAs($owner)->post(route('owner.services.store', $other), ['name' => 'Free stuff'])->assertForbidden();
@@ -65,7 +66,7 @@ class AccessControlTest extends TestCase
     public function test_user_cannot_register_as_admin(): void
     {
         $this->post(route('register'), [
-            'name' => 'Sneaky', 'email' => 'sneaky@example.com', 'account_type' => 'admin',
+            'name' => 'Sneaky', 'email' => 'sneaky@example.com', 'account_type' => 'admin', 'terms' => '1',
             'password' => 'password123', 'password_confirmation' => 'password123',
         ])->assertSessionHasErrors('account_type');
 
@@ -75,7 +76,7 @@ class AccessControlTest extends TestCase
     public function test_extra_role_field_is_ignored_on_registration_and_profile_update(): void
     {
         $this->post(route('register'), [
-            'name' => 'Normal', 'email' => 'normal@example.com', 'account_type' => 'customer', 'role' => 'admin',
+            'name' => 'Normal', 'email' => 'normal@example.com', 'account_type' => 'customer', 'role' => 'admin', 'terms' => '1',
             'password' => 'password123', 'password_confirmation' => 'password123',
         ])->assertRedirect();
 
@@ -113,7 +114,7 @@ class AccessControlTest extends TestCase
 
         $this->actingAs($owner)->post(route('owner.establishments.store'), [
             'category_id' => $category->id, 'name' => 'Sneaky Shop', 'description' => str_repeat('a', 30),
-            'address' => '1 Street', 'city' => 'Cebu City', 'status' => 'approved',
+            'address' => '1 Street', 'city_id' => City::factory()->create()->id, 'status' => 'approved',
         ])->assertRedirect();
 
         $this->assertSame('pending', Establishment::where('name', 'Sneaky Shop')->value('status'));

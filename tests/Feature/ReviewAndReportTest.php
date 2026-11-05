@@ -8,6 +8,7 @@ use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ReviewAndReportTest extends TestCase
@@ -132,7 +133,7 @@ class ReviewAndReportTest extends TestCase
 
         $this->expectException(QueryException::class);
         // Neither target set: blocked by the CHECK constraint.
-        \Illuminate\Support\Facades\DB::table('reports')->insert([
+        DB::table('reports')->insert([
             'user_id' => $user->id, 'reason' => 'spam', 'status' => 'pending', 'created_at' => now(), 'updated_at' => now(),
         ]);
     }
