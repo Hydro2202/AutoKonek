@@ -95,7 +95,7 @@
                 @endif
             </section>
 
-            {{-- Getting there: directions open the visitor's own maps app --}}
+            {{-- Getting there: the real route is drawn on the page; map apps are one click away --}}
             @php $map = $establishment->mapLinks(); @endphp
             <section id="directions" aria-labelledby="directions-title" class="scroll-mt-24">
                 <h2 id="directions-title" class="text-3xl">Getting there</h2>
@@ -104,32 +104,38 @@
                     <span>{{ $establishment->address }}, {{ $establishment->locationLabel() }}@if ($establishment->city?->region), {{ $establishment->city->region->name }}@endif</span>
                 </p>
 
-                <div class="mt-4 overflow-hidden rounded-lg border border-line bg-white">
-                    @if ($map->embedUrl())
-                        <div data-map-frame class="relative flex aspect-[16/8] items-center justify-center bg-navy-900 text-white">
+                <div @if ($map->hasCoordinates()) data-route-panel data-lat="{{ $establishment->latitude }}" data-lng="{{ $establishment->longitude }}" data-name="{{ $establishment->name }}" data-auto="{{ request()->boolean('directions') ? '1' : '0' }}" @endif
+                     class="mt-4 overflow-hidden rounded-lg border border-line bg-white">
+                    @if ($map->hasCoordinates())
+                        <div data-route-stage class="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-navy-900 text-white sm:aspect-[16/9]">
                             <div class="px-4 text-center">
-                                <span class="sign mx-auto size-12 !bg-navy-800"><x-ui.icon name="map-pin" class="size-6" /></span>
-                                <p class="mt-3 font-display text-2xl">See it on the map</p>
-                                <p class="mx-auto mt-1 max-w-xs text-sm text-white/65">The map is provided by OpenStreetMap and only loads when you ask for it.</p>
-                                <button type="button" data-map-load data-no-loading data-src="{{ $map->embedUrl() }}" data-title="Map showing {{ $establishment->name }}" class="btn-primary mt-4"><x-ui.icon name="map" class="size-4" /> Show map</button>
+                                <span class="sign mx-auto size-12 !bg-navy-800"><x-ui.icon name="navigation" class="size-6" /></span>
+                                <p class="mt-3 font-display text-2xl">See the route from where you are</p>
+                                <p class="mx-auto mt-1 max-w-sm text-sm text-white/65">Your phone or computer shares its position with this page, and the route is drawn on the map with turn-by-turn steps.</p>
+                                <div class="mt-4 flex flex-wrap justify-center gap-2">
+                                    <button type="button" data-route-start data-no-loading class="btn-primary"><x-ui.icon name="navigation" class="size-4" /> Get directions</button>
+                                    <button type="button" data-route-map-only data-no-loading class="btn !border !border-white/30 text-white hover:bg-white/10">Show map only</button>
+                                </div>
                             </div>
                             <span class="roadline absolute inset-x-0 bottom-4"></span>
                         </div>
+                        <p data-route-summary role="status" hidden class="border-t border-line bg-steel-50 px-5 py-3 font-semibold text-navy"></p>
+                        <ol data-route-steps hidden class="max-h-72 space-y-2 overflow-y-auto border-t border-line px-5 py-4 text-[0.9375rem]"></ol>
                     @else
-                        <p class="border-b border-line bg-page px-5 py-3 text-sm text-muted">This listing has no GPS pin yet, so the buttons below search for its address instead.</p>
+                        <p class="border-b border-line bg-page px-5 py-3 text-sm text-muted">This listing has no GPS pin yet, so the buttons below search for its address in your maps app.</p>
                     @endif
 
-                    <div class="flex flex-wrap items-center gap-2 p-4">
-                        <a href="{{ $map->googleDirections() }}" target="_blank" rel="noopener" data-no-transition class="btn-primary"><x-ui.icon name="navigation" class="size-4" /> Get directions</a>
-                        <a href="{{ $map->waze() }}" target="_blank" rel="noopener" data-no-transition class="btn-outline">Open in Waze</a>
-                        <a href="{{ $map->openStreetMap() }}" target="_blank" rel="noopener" data-no-transition class="btn-outline">OpenStreetMap <x-ui.icon name="external" class="size-3.5" /></a>
-                        @if ($map->hasCoordinates())
-                            <button type="button" data-distance-check="#distance-result" data-lat="{{ $establishment->latitude }}" data-lng="{{ $establishment->longitude }}" data-no-loading class="btn-ghost"><x-ui.icon name="crosshair" class="size-4" /> How far is it?</button>
-                        @endif
+                    <div class="flex flex-wrap items-center gap-2 border-t border-line p-4">
+                        <a href="{{ $map->googleDirections() }}" data-google-link target="_blank" rel="noopener" class="btn-outline"><x-ui.icon name="navigation" class="size-4" /> Open in Google Maps</a>
+                        <a href="{{ $map->waze() }}" target="_blank" rel="noopener" class="btn-outline">Open in Waze</a>
+                        <a href="{{ $map->openStreetMap() }}" target="_blank" rel="noopener" class="btn-outline">OpenStreetMap <x-ui.icon name="external" class="size-3.5" /></a>
                     </div>
-                    <p id="distance-result" role="status" class="px-4 pb-4 text-sm text-ink/90 empty:hidden"></p>
+                    <p data-route-message role="status" class="px-4 pb-4 text-sm text-danger-700 empty:hidden"></p>
                 </div>
-                <p class="mt-2 text-sm text-muted">Get directions opens Google Maps with the route from where you are. Your location is only shared with the map app you choose.</p>
+                <p class="mt-2 text-sm text-muted">The route and map come from OpenStreetMap services and load only when you press a button. Your position is not saved by AutoKonek.</p>
+                @if ($establishment->osm_ref)
+                    <p class="mt-1 text-sm text-muted">This listing was created from public map data (<a href="https://www.openstreetmap.org/{{ $establishment->osm_ref }}" target="_blank" rel="noopener" class="font-semibold text-steel underline underline-offset-2">OpenStreetMap</a>, &copy; OpenStreetMap contributors, <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="font-semibold text-steel underline underline-offset-2">ODbL</a>). The business has not claimed it yet, so prices and hours may be missing.</p>
+                @endif
             </section>
 
             {{-- Reviews --}}
@@ -249,7 +255,11 @@
                         </div>
                     </div>
                 </dl>
-                <a href="#directions" class="btn-primary mt-5 w-full"><x-ui.icon name="navigation" class="size-4" /> Get directions</a>
+                @if ($map->hasCoordinates())
+                    <button type="button" data-route-start data-no-loading class="btn-primary mt-5 w-full"><x-ui.icon name="navigation" class="size-4" /> Get directions</button>
+                @else
+                    <a href="{{ $map->googleDirections() }}" target="_blank" rel="noopener" class="btn-primary mt-5 w-full"><x-ui.icon name="navigation" class="size-4" /> Get directions</a>
+                @endif
                 @if ($establishment->contact_number)
                     <a href="tel:{{ preg_replace('/[^0-9+]/', '', $establishment->contact_number) }}" class="btn-outline mt-2 w-full"><x-ui.icon name="phone" class="size-4" /> Call now</a>
                 @endif

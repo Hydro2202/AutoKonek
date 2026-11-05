@@ -4,7 +4,24 @@
 
 AutoKonek lets vehicle owners search gas stations, car washes, repair shops, tire shops, parking facilities and battery services, read ratings and reviews, and report bad listings. Business owners submit and manage their establishments; administrators approve listings and moderate the platform.
 
-Built with Laravel 13, PHP 8.4, PostgreSQL, Blade, Tailwind CSS 4 and Vite. This is a college final project.
+Built with the Laravel framework (Laravel 13, PHP 8.4) using the **MVC** pattern, a **MySQL** database, Blade, Tailwind CSS 4 and Vite. This is a college final project.
+
+## What it solves, and where the CRUD is
+
+Finding a trustworthy gas station, car wash, repair shop, tire shop, parking lot or battery service usually means calling around or asking friends. AutoKonek puts verified local listings, prices, reviews and directions in one place, and gives small businesses a simple way to maintain their listing.
+
+Every feature follows Laravel's MVC structure: **Models** (`app/Models`) talk to MySQL through Eloquent, **Controllers** (`app/Http/Controllers`) handle requests, and **Views** (`resources/views`, Blade) render the pages.
+
+| Data | Create | Read | Update | Delete |
+|---|---|---|---|---|
+| Accounts | Register | Profile, admin user list | Edit profile, change password, admin activate/deactivate | Deactivation (accounts are never hard-deleted) |
+| Establishments | Owner submits a listing | Directory, listing page, owner and admin lists | Owner edits, admin approves/rejects | Owner or admin deletes |
+| Services (prices) | Owner adds | Listing page | Owner edits | Owner removes |
+| Images | Owner uploads | Listing page | Owner sets the main photo | Owner removes |
+| Reviews | Customer posts | Listing page, my reviews | Customer edits | Customer or admin deletes |
+| Reports | User reports a listing or review | My reports, admin list | Admin resolves or dismisses | Removed with the item it refers to |
+| Categories | Admin adds | Filters, admin list | Admin renames/activates | Admin deletes (only if unused) |
+| Contact messages | Anyone signed in sends | Admin inbox | n/a | n/a |
 
 ## Features by role
 
@@ -24,10 +41,10 @@ Built with Laravel 13, PHP 8.4, PostgreSQL, Blade, Tailwind CSS 4 and Vite. This
 
 ## Requirements
 
-- PHP 8.3+ with extensions: `pdo_pgsql`, `pgsql`, `mbstring`, `openssl`, `fileinfo`, `gd`, `zip`, `curl`
+- PHP 8.3+ with extensions: `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `gd`, `zip`, `curl`
 - Composer 2
 - Node.js 20+ and npm
-- PostgreSQL 14+
+- MySQL 8.0.16 or newer (8.4 is what AutoKonek is tested on). MySQL 8.0.16+ is needed because the database enforces `CHECK` constraints.
 
 ## Installation
 
@@ -40,13 +57,13 @@ npm install
 
 ### 2. Create the databases
 
-Using `psql` (it will ask for the `postgres` password):
+Using the `mysql` command line client (it asks for the root password):
 
 ```bash
-psql -U postgres -c "CREATE DATABASE autokonek;" -c "CREATE DATABASE autokonek_test;"
+mysql -u root -p -e "CREATE DATABASE autokonek CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE DATABASE autokonek_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
-On Windows, `psql` is usually in `C:\Program Files\PostgreSQL\<version>\bin`. You can also create the two databases in pgAdmin 4 (Databases > Create > Database).
+You can also create the two databases in phpMyAdmin or MySQL Workbench. If you use XAMPP or Laragon, start MySQL from their control panel first.
 
 `autokonek_test` is used only by the automated tests. **Never point the tests at a database that holds real data**: the tests wipe it.
 
@@ -60,12 +77,12 @@ php artisan key:generate
 Edit `.env`:
 
 ```
-DB_CONNECTION=pgsql
+DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=5432
+DB_PORT=3306
 DB_DATABASE=autokonek
-DB_USERNAME=postgres
-DB_PASSWORD=your_postgres_password
+DB_USERNAME=root
+DB_PASSWORD=your_mysql_password
 
 ADMIN_NAME="AutoKonek Admin"
 ADMIN_EMAIL=you@example.com
@@ -109,7 +126,7 @@ While developing styles, run `npm run dev` in a second terminal instead of `npm 
 php artisan test
 ```
 
-Tests use the `autokonek_test` PostgreSQL database (configured in `phpunit.xml`; the password comes from your `.env`).
+Tests use the `autokonek_test` MySQL database (configured in `phpunit.xml`; the password comes from your `.env`).
 
 ## First administrator
 
@@ -142,7 +159,7 @@ The demo establishments (for example "Demo Sparkle Car Wash") are **fictional** 
 - Owners can only touch their own establishments (policy check plus route scoping for nested services and images).
 - Uploads: JPG/PNG/WebP only, max 2 MB, stored under a random generated file name.
 - User text is escaped by Blade. All queries go through Eloquent or bindings.
-- PostgreSQL constraints back up the rules: role/status/rating `CHECK`s, unique reviews per user and establishment, a report must reference exactly one target, and only one open report per user per target.
+- MySQL constraints back up the rules: role/status/rating/coordinate `CHECK`s, unique reviews per user and establishment, a report must reference exactly one target (enforced by a trigger), and only one open report per user per target (a unique index over a generated column).
 
 This has been checked by automated tests, but no automated test suite proves an application is completely secure.
 
@@ -162,14 +179,17 @@ AutoKonek is based in **Lucena City, Quezon** (change it in `config/autokonek.ph
 - **Official places.** `php artisan migrate --seed` loads every region, province, city and municipality from `database/data/ph-locations.json`: 17 regions, 81 provinces and 1,634 cities and municipalities (146 flagged as cities). The data comes from the Philippine Standard Geographic Code (PSA) and is a snapshot, so recently created cities may be missing. Re-running `php artisan db:seed --class=PhilippineLocationSeeder` is safe.
 - **Structured location.** A listing stores its city (which determines its province and region), an optional barangay, and the street address. Owners pick the place with region, province and city selectors; Metro Manila has no provinces, so its cities are listed directly. New listings start in Lucena City.
 - **Browse by place.** `/places` lists every region with its cities (or every city and municipality), with listing counts. The directory can be filtered by region, province and city.
-- **Directions.** Each listing has "Get directions" (Google Maps), "Open in Waze" and "OpenStreetMap" buttons. They are plain links, so no map API key is needed. Listings with a GPS pin send the exact position; others search the address.
-- **Map.** The OpenStreetMap map on a listing page loads only after the visitor presses "Show map", so opening a page contacts no third party.
-- **GPS.** "Near me" in the directory asks the browser for the visitor's position and sorts by distance (straight-line distance, calculated in PostgreSQL). "How far is it?" on a listing is calculated in the browser. Owners can fill in their business's latitude and longitude with "Use my current location". Browsers require HTTPS (or `localhost`) for location access.
+- **Directions on the page.** "Get directions" on a listing (or the Directions button on a listing card) asks the browser for the visitor's GPS position, then draws the real driving route on a map, with the road distance, the estimated time and turn-by-turn steps. The route comes from the public OSRM routing service, and the map is made of OpenStreetMap tile pictures with the route drawn over them (`resources/js/modules/route-map.js`), so no map API key or extra library is needed. Nothing is requested until the visitor clicks, and "Show map only" shows just the place.
+- **Map apps.** Each listing also has "Open in Google Maps", "Open in Waze" and "OpenStreetMap" links. After a route is shown, the Google Maps link carries the visitor's starting point so it shows the same route. Listings with a GPS pin use the exact position; others search the address.- **GPS.** "Near me" in the directory asks the browser for the visitor's position and sorts by distance (straight-line distance, calculated in MySQL). Owners can fill in their business's latitude and longitude with "Use my current location". Browsers require HTTPS (or `localhost`) for location access.
+
+## Who can open what
+
+- **Not logged in:** only the landing page, the legal pages (Privacy, Terms, Cookies), login and register. Every other page, including the directory, listings, places, About and Contact, sends the visitor to the login page with an explanation. After logging in they land on the page they asked for.
+- **Customers, business owners and administrators** each get their own pages, enforced on the server. Deactivated accounts lose access immediately.
 
 ## Page transitions
 
-When a link is clicked, a car drives along a road past roadside place signs and keeps going once the next page has loaded. It runs for every link in the public site, owner area and admin area, and is skipped for visitors who prefer reduced motion. The code is in `resources/js/modules/route-transition.js` and `resources/css/components/transition.css`.
-
+The car transition is used only for the essential journeys: opening a listing or a service category. A car drives along a road past roadside place signs and keeps going once the next page has loaded, with "Heading to <name>" under it. Every other link and form behaves normally. A link opts in with `data-transition` (and an optional `data-rt-label`). It is skipped for visitors who prefer reduced motion. The code is in `resources/js/modules/route-transition.js` and `resources/css/components/transition.css`.
 ## Design system
 
 Road-signage and workshop vocabulary: navy asphalt, one orange "center line", square sign tiles, license-plate ratings and job-card listing tickets. Headings use Barlow Condensed, body text Barlow, and the admin area IBM Plex Sans. Design tokens live in `resources/css/theme.css`. Motion is limited to the homepage service board, toasts, the cookie banner, dialogs and button loading states, and it is switched off for visitors who prefer reduced motion.
@@ -209,11 +229,15 @@ tests/Feature/       Automated tests
 
 **`php` or `composer` is not recognized.** Close and reopen your terminal (and VS Code) so it picks up the new PATH.
 
-**`could not find driver` / `PDOException`.** Enable PostgreSQL in `php.ini` by removing the `;` before `extension=pdo_pgsql` and `extension=pgsql`, then check with `php -m`.
+**`could not find driver` / `PDOException`.** Enable MySQL in `php.ini` by removing the `;` before `extension=pdo_mysql`, then check with `php -m`.
 
-**`SQLSTATE[08006] connection refused`.** PostgreSQL is not running or the port is wrong. Check the service is running and that `DB_HOST` / `DB_PORT` match. Test with `psql -U postgres -h 127.0.0.1`.
+**`SQLSTATE[HY000] [2002] No connection could be made`.** MySQL is not running or the port is wrong. Start the MySQL service (or XAMPP/Laragon), and check that `DB_HOST` / `DB_PORT` match. Test with `mysql -u root -p -h 127.0.0.1`.
 
-**`password authentication failed for user "postgres"`.** `DB_PASSWORD` in `.env` is wrong. After editing `.env`, run `php artisan config:clear`.
+**`SQLSTATE[HY000] [1045] Access denied for user`.** `DB_USERNAME` or `DB_PASSWORD` in `.env` is wrong. After editing `.env`, run `php artisan config:clear`.
+
+**`Unknown database "autokonek"`.** Create the database (step 2).
+
+**`CHECK constraint` errors when migrating.** Your MySQL is older than 8.0.16 and does not enforce `CHECK` constraints. Upgrade MySQL.
 
 **`database "autokonek" does not exist`.** Create it (step 2).
 

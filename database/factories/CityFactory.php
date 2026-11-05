@@ -18,7 +18,7 @@ class CityFactory extends Factory
             // The region is taken from the province so the two always agree.
             'province_id' => Province::factory(),
             'region_id' => fn (array $attributes) => Province::find($attributes['province_id'])->region_id,
-            'psgc_code' => fake()->unique()->numerify('##0####00'),
+            'psgc_code' => 'TST'.fake()->unique()->numerify('#######'),
             'name' => ucwords(fake()->unique()->words(2, true)).' City',
             'is_city' => true,
         ];

@@ -15,7 +15,7 @@ class ProvinceFactory extends Factory
     {
         return [
             'region_id' => Region::factory(),
-            'psgc_code' => fake()->unique()->numerify('##00#0000'),
+            'psgc_code' => 'TST'.fake()->unique()->numerify('#######'),
             'name' => ucwords(fake()->unique()->words(2, true)),
         ];
     }

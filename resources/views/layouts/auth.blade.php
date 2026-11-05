@@ -28,6 +28,12 @@
         </div>
         <main id="main" class="flex flex-1 items-center justify-center px-5 py-10 sm:px-10">
             <div class="w-full max-w-md">
+                @if (session('info'))
+                    <div role="status" class="mb-5 flex items-start gap-3 rounded-md border border-steel/30 bg-steel-50 px-4 py-3 text-sm text-navy">
+                        <x-ui.icon name="lock" class="mt-0.5 size-5 shrink-0 text-steel" />
+                        <p>{{ session('info') }}</p>
+                    </div>
+                @endif
                 <x-ui.form-errors />
                 @yield('content')
             </div>

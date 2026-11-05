@@ -6,12 +6,20 @@ use App\Models\Category;
 use App\Models\City;
 use App\Models\Establishment;
 use App\Models\Review;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DirectoryTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // The directory is for signed-in users.
+        $this->actingAs(User::factory()->create());
+    }
 
     public function test_unapproved_establishments_are_not_listed_or_viewable(): void
     {
@@ -88,5 +96,32 @@ class DirectoryTest extends TestCase
         $fresh = Establishment::withRatings()->find($e->id);
         $this->assertSame(4.0, $fresh->averageRating());
         $this->assertSame(2, $fresh->reviewCount());
+    }
+
+    public function test_search_ignores_capital_letters(): void
+    {
+        Establishment::factory()->create(['name' => 'Alpha Tire Hub']);
+
+        $this->get(route('establishments.index', ['q' => 'TIRE hub']))->assertSee('Alpha Tire Hub');
+        $this->get(route('establishments.index', ['q' => 'alpha']))->assertSee('Alpha Tire Hub');
+    }
+
+    public function test_search_treats_percent_and_underscore_as_plain_characters(): void
+    {
+        Establishment::factory()->create(['name' => 'Alpha Garage']);
+
+        $this->get(route('establishments.index', ['q' => '%']))->assertDontSee('Alpha Garage');
+        $this->get(route('establishments.index', ['q' => 'A_pha']))->assertDontSee('Alpha Garage');
+    }
+
+    public function test_unrated_listings_sort_after_rated_ones(): void
+    {
+        $unrated = Establishment::factory()->create(['name' => 'Unrated Place']);
+        $rated = Establishment::factory()->create(['name' => 'Rated Place']);
+        Review::factory()->create(['establishment_id' => $rated->id, 'rating' => 3]);
+
+        $names = $this->get(route('establishments.index', ['sort' => 'rating']))->viewData('establishments')->pluck('name')->all();
+
+        $this->assertSame(['Rated Place', 'Unrated Place'], $names);
     }
 }

@@ -26,8 +26,8 @@
 
 <section class="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
     <div class="rounded-lg border border-dashed border-line-strong bg-white p-6">
-        <h2 class="text-2xl">About the demo data</h2>
-        <p class="mt-2 leading-relaxed text-muted">AutoKonek is a college final project. The establishments you see while it runs locally are fictional and are not verified real-world businesses. AutoKonek does not process payments or bookings; prices shown are provided by each business, so confirm them with the business before you go.</p>
+        <h2 class="text-2xl">Where the listings come from</h2>
+        <p class="mt-2 leading-relaxed text-muted">Many listings, such as gas stations, car washes and repair shops around Lucena City and Quezon, are created from public map data by <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" class="font-semibold text-steel underline underline-offset-2">OpenStreetMap contributors</a>. They show only what is on the map and have not been claimed by the business. Business owners can register to add services, prices, photos and hours. AutoKonek does not process payments or bookings, so confirm prices with the business before you go.</p>
     </div>
 </section>
 @endsection

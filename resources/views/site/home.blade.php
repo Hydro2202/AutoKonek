@@ -9,6 +9,7 @@
         <h1 class="text-[3.75rem] leading-[0.9] sm:text-[5.75rem]">Find the services your vehicle needs.</h1>
         <p class="mt-5 max-w-lg text-lg leading-relaxed text-ink/80">Look up gas stations, car washes, repair shops, tire shops, parking and battery services, with prices and reviews from other drivers.</p>
 
+        @auth
         <form action="{{ route('establishments.index') }}" method="GET" role="search"
               class="mt-8 flex max-w-xl flex-col overflow-hidden rounded-sign border-2 border-navy bg-white sm:flex-row">
             <label for="hero-q" class="sr-only">Establishment name</label>
@@ -27,11 +28,18 @@
             </select>
             <button type="submit" class="btn-primary !rounded-none px-7 py-3.5 text-base">Search</button>
         </form>
+        @else
+        <div class="mt-8 flex flex-wrap gap-3">
+            <a href="{{ route('login') }}" class="btn-primary btn-lg">Log in to start</a>
+            <a href="{{ route('register') }}" class="btn-outline btn-lg">Create free account</a>
+        </div>
+        <p class="mt-3 max-w-md text-sm text-muted">Search, listings, maps and reviews are for registered users. It takes a minute to sign up.</p>
+        @endauth
 
         <p class="mt-5 text-[0.9375rem] text-muted">
             <strong class="font-semibold text-ink">{{ $totals['establishments'] }}</strong> approved listings and
             <strong class="font-semibold text-ink">{{ $totals['reviews'] }}</strong> customer reviews so far.
-            <a href="{{ route('places.index') }}" class="font-semibold text-steel underline underline-offset-2">Browse every city in the Philippines</a>
+            @auth<a href="{{ route('places.index') }}" class="font-semibold text-steel underline underline-offset-2">Browse every city in the Philippines</a>@endauth
         </p>
     </div>
 
@@ -43,7 +51,7 @@
         <ul class="divide-y divide-white/10">
             @foreach ($categories as $category)
                 <li>
-                    <a href="{{ route('categories.show', $category) }}" class="group -mx-2 flex items-center gap-4 rounded-sign px-2 py-3.5 hover:bg-white/5">
+                    <a href="{{ auth()->check() ? route('categories.show', $category) : route('login') }}" @auth data-transition data-rt-label="{{ $category->name }}" @endauth class="group -mx-2 flex items-center gap-4 rounded-sign px-2 py-3.5 hover:bg-white/5">
                         <span class="sign size-11 !bg-navy-800"><x-ui.icon :name="$category->icon()" class="size-6" /></span>
                         <span class="flex-1 font-display text-[1.65rem] leading-none font-medium">{{ $category->name }}</span>
                         <span data-flap="{{ sprintf('%02d', $category->establishments_count) }}" class="font-display text-[1.65rem] leading-none font-semibold text-accent">{{ sprintf('%02d', $category->establishments_count) }}</span>
@@ -52,12 +60,13 @@
                 </li>
             @endforeach
         </ul>
-        <a href="{{ route('establishments.index') }}" class="mt-2 inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-white hover:text-accent">
-            Browse every listing <x-ui.icon name="arrow-right" class="size-4" />
+        <a href="{{ auth()->check() ? route('establishments.index') : route('login') }}" class="mt-2 inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-white hover:text-accent">
+            {{ auth()->check() ? 'Browse every listing' : 'Log in to browse listings' }} <x-ui.icon name="arrow-right" class="size-4" />
         </a>
     </aside>
 </section>
 
+@auth
 {{-- Local: places around Lucena City and Quezon province --}}
 @if ($places->isNotEmpty())
 <section class="mx-auto max-w-7xl px-4 pb-14 sm:px-6" aria-labelledby="places-title">
@@ -104,6 +113,7 @@
         @endif
     </div>
 </section>
+@endauth
 
 {{-- How it works: a real sequence of three stops --}}
 <section class="mx-auto max-w-7xl px-4 py-16 sm:px-6">

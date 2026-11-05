@@ -8,7 +8,7 @@ import { initServiceBoard } from './modules/service-board';
 import { initRouteTransition } from './modules/route-transition';
 import { initLocationPicker } from './modules/location-picker';
 import { initGeolocation } from './modules/geolocation';
-import { initMapEmbed } from './modules/map-embed';
+import { initRouteMap } from './modules/route-map';
 
 document.addEventListener('DOMContentLoaded', () => {
     initRouteTransition();
@@ -21,5 +21,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initServiceBoard();
     initLocationPicker();
     initGeolocation();
-    initMapEmbed();
+    initRouteMap();
 });

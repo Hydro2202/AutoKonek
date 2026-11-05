@@ -1,11 +1,15 @@
 @php
-    $links = [
-        ['establishments.index', 'Find services'],
-        ['places.index', 'Places'],
-        ['about', 'About'],
-        ['contact', 'Contact'],
-    ];
     $user = auth()->user();
+
+    // Members-only pages: guests are not shown links they cannot open.
+    $links = $user
+        ? [
+            ['establishments.index', 'Find services'],
+            ['places.index', 'Places'],
+            ['about', 'About'],
+            ['contact', 'Contact'],
+        ]
+        : [];
 @endphp
 <header class="sticky top-0 z-40 bg-navy text-white">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3 sm:px-6" aria-label="Main">

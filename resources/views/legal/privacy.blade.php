@@ -61,9 +61,9 @@
 
     <h2 id="location-maps">Location and maps</h2>
     <ul>
-        <li><strong>Your device location.</strong> If you press "Near me" or "How far is it?", your browser first asks your permission and then shares your position with AutoKonek's page. For "Near me", your coordinates are sent to our server once to sort the results by distance. We do not save them to your account, but they are part of the page address, so they can appear in standard web server logs. "How far is it?" is worked out in your browser and is not sent to us.</li>
-        <li><strong>Directions.</strong> "Get directions", "Open in Waze" and "OpenStreetMap" are links. They open a map service in a new tab, and from then on that service's own privacy policy applies. We tell the service only where the business is, not where you are.</li>
-        <li><strong>Embedded map.</strong> The map on a listing page is provided by OpenStreetMap and loads only after you press "Show map". When it loads, OpenStreetMap receives your IP address and browser details.</li>
+        <li><strong>Your device location.</strong> If you press "Near me" or "Get directions", your browser first asks your permission and then shares your position with AutoKonek's page. For "Near me", your coordinates are sent to our server once to sort the results by distance. We do not save them to your account, but they are part of the page address, so they can appear in standard web server logs.</li>
+        <li><strong>Route on the page.</strong> When you press "Get directions" on a listing, your position and the business's position are sent from your browser to the public OSRM routing service (router.project-osrm.org) to work out the road route, and the map pictures are loaded from OpenStreetMap's map server (tile.openstreetmap.org). Those services receive your IP address and browser details, and their own policies apply. AutoKonek does not store your position.</li>
+        <li><strong>Map apps.</strong> "Open in Google Maps", "Open in Waze" and "OpenStreetMap" are links that open that service in a new tab. From then on its own privacy policy applies. After you have used "Get directions", the Google Maps link includes your starting point so it shows the same route.</li>
         <li><strong>Business pins.</strong> Business owners can add GPS coordinates of their business. These are public, because they are shown on the listing.</li>
     </ul>
 

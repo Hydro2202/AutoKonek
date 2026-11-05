@@ -103,13 +103,13 @@ class Establishment extends Model
             return $query;
         }
 
-        // ILIKE is PostgreSQL's case-insensitive LIKE. Escape wildcards typed by the user.
+        // LIKE is case-insensitive with MySQL's default collation. Escape wildcards typed by the user.
         $like = '%'.addcslashes($term, '%_\\').'%';
 
         return $query->where(fn (Builder $q) => $q
-            ->where('name', 'ilike', $like)
-            ->orWhere('description', 'ilike', $like)
-            ->orWhere('address', 'ilike', $like));
+            ->where('name', 'like', $like)
+            ->orWhere('description', 'like', $like)
+            ->orWhere('address', 'like', $like));
     }
 
     /** Filter by the place the business is in. Any combination of region, province and city. */
@@ -163,7 +163,7 @@ class Establishment extends Model
     public function locationLabel(): string
     {
         return collect([
-            filled($this->barangay) ? 'Brgy. '.$this->barangay : null,
+            filled($this->barangay) ? (Str::startsWith(strtolower($this->barangay), ['barangay', 'brgy']) ? $this->barangay : 'Brgy. '.$this->barangay) : null,
             $this->city?->name,
             $this->city?->areaName(),
         ])->filter()->implode(', ');

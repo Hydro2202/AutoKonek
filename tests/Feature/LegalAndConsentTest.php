@@ -24,7 +24,7 @@ class LegalAndConsentTest extends TestCase
 
     public function test_every_public_page_links_to_the_legal_pages_and_has_the_cookie_banner(): void
     {
-        foreach (['home', 'about', 'contact', 'establishments.index', 'login', 'register'] as $route) {
+        foreach (['home', 'login', 'register', 'legal.privacy', 'legal.terms', 'legal.cookies'] as $route) {
             $this->get(route($route))
                 ->assertOk()
                 ->assertSee(route('legal.privacy'), false)

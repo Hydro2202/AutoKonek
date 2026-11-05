@@ -116,7 +116,13 @@ class AdminManagementTest extends TestCase
     public function test_public_pages_load(): void
     {
         $this->get('/')->assertOk()->assertSee('Find the services your vehicle needs');
-        foreach (['about', 'contact', 'login', 'register', 'establishments.index'] as $route) {
+        foreach (['login', 'register', 'legal.privacy', 'legal.terms', 'legal.cookies'] as $route) {
+            $this->get(route($route))->assertOk();
+        }
+
+        // A signed-in customer can open the rest.
+        $this->actingAs(User::factory()->create());
+        foreach (['about', 'contact', 'establishments.index', 'places.index'] as $route) {
             $this->get(route($route))->assertOk();
         }
     }

@@ -21,16 +21,31 @@ return new class extends Migration
             $table->timestamp('resolved_at')->nullable();
             $table->timestamps();
 
+            // 1 while a report is open (pending), NULL once it is resolved or dismissed.
+            // MySQL treats NULLs in a unique index as different, so the two unique indexes
+            // below only apply to open reports: one open report per user per target.
+            $table->unsignedTinyInteger('open_flag')->nullable()->virtualAs("IF(status = 'pending', 1, NULL)");
+
             $table->index('status');
+            $table->unique(['user_id', 'establishment_id', 'open_flag'], 'reports_open_establishment_unique');
+            $table->unique(['user_id', 'review_id', 'open_flag'], 'reports_open_review_unique');
         });
 
-        // A report must point at exactly one target: an establishment OR a review.
-        DB::statement('ALTER TABLE reports ADD CONSTRAINT reports_single_target_check CHECK ((establishment_id IS NOT NULL AND review_id IS NULL) OR (establishment_id IS NULL AND review_id IS NOT NULL))');
         DB::statement("ALTER TABLE reports ADD CONSTRAINT reports_status_check CHECK (status IN ('pending', 'resolved', 'dismissed'))");
 
-        // One open report per user per target.
-        DB::statement("CREATE UNIQUE INDEX reports_open_establishment_unique ON reports (user_id, establishment_id) WHERE status = 'pending' AND establishment_id IS NOT NULL");
-        DB::statement("CREATE UNIQUE INDEX reports_open_review_unique ON reports (user_id, review_id) WHERE status = 'pending' AND review_id IS NOT NULL");
+        // A report must point at exactly one target: an establishment OR a review.
+        // (MySQL does not allow a CHECK on columns whose foreign keys cascade, so a trigger enforces it.)
+        foreach (['INSERT', 'UPDATE'] as $event) {
+            DB::unprepared("
+                CREATE TRIGGER reports_single_target_before_{$event}
+                BEFORE {$event} ON reports FOR EACH ROW
+                BEGIN
+                    IF (NEW.establishment_id IS NULL) = (NEW.review_id IS NULL) THEN
+                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A report needs exactly one target: an establishment or a review.';
+                    END IF;
+                END
+            ");
+        }
     }
 
     public function down(): void

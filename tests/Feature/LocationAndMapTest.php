@@ -30,6 +30,8 @@ class LocationAndMapTest extends TestCase
     {
         parent::setUp();
         $this->seed(PhilippineLocationSeeder::class);
+        // Browsing is for signed-in users.
+        $this->actingAs(User::factory()->create());
     }
 
     private function city(string $name, string $province = 'Quezon'): City
@@ -164,7 +166,7 @@ class LocationAndMapTest extends TestCase
         $this->get(route('establishments.index', ['sort' => 'nearest']))->assertOk()->assertSee('Any Garage');
     }
 
-    public function test_the_listing_page_offers_directions_and_a_click_to_load_map(): void
+    public function test_the_listing_page_offers_an_on_page_route_and_map_app_links(): void
     {
         $listing = $this->listingIn($this->city('Lucena City'), 'Pinned Garage', self::LUCENA);
         $listing->update(['barangay' => 'Ilayang Dupay']);
@@ -176,9 +178,15 @@ class LocationAndMapTest extends TestCase
             ->assertSee('google.com/maps/dir/', false)
             ->assertSee('destination=13.937600%2C121.619100', false)
             ->assertSee('waze.com/ul', false)
-            ->assertSee('data-map-load', false)
-            // No third-party map is contacted until the visitor asks for it.
-            ->assertDontSee('<iframe', false);
+            // The route panel carries the destination for the route-map script.
+            ->assertSee('data-route-panel', false)
+            ->assertSee('data-lat="13.937600"', false)
+            ->assertSee('data-lng="121.619100"', false)
+            ->assertSee('data-route-start', false)
+            // No third-party service is contacted until the visitor asks for the route.
+            ->assertDontSee('<iframe', false)
+            ->assertDontSee('tile.openstreetmap.org', false)
+            ->assertDontSee('router.project-osrm.org', false);
     }
 
     public function test_directions_fall_back_to_the_address_when_there_is_no_pin(): void
@@ -190,7 +198,8 @@ class LocationAndMapTest extends TestCase
             ->assertOk()
             ->assertSee('no GPS pin yet')
             ->assertSee('Unpinned+Garage%2C+Quezon+Avenue%2C+Lucena+City%2C+Quezon%2C+Philippines', false)
-            ->assertDontSee('data-map-load', false);
+            ->assertDontSee('data-route-panel', false)
+            ->assertDontSee('data-route-start', false);
     }
 
     public function test_map_links_are_built_from_coordinates_or_the_address(): void
@@ -202,10 +211,9 @@ class LocationAndMapTest extends TestCase
         $this->assertStringContainsString('travelmode=driving', $links->googleDirections());
         $this->assertStringContainsString('ll=13.937600%2C121.619100', $links->waze());
         $this->assertStringContainsString('mlat=13.937600', $links->openStreetMap());
-        $this->assertStringContainsString('openstreetmap.org/export/embed.html', $links->embedUrl());
 
         $unpinned = $this->listingIn($this->city('Sariaya'), 'Unpinned');
-        $this->assertNull(MapLinks::for($unpinned)->embedUrl());
+        $this->assertFalse(MapLinks::for($unpinned)->hasCoordinates());
         $this->assertStringContainsString('openstreetmap.org/search', MapLinks::for($unpinned)->openStreetMap());
     }
 
@@ -282,5 +290,20 @@ class LocationAndMapTest extends TestCase
             ->assertOk()
             ->assertSee('Around Lucena City and Quezon')
             ->assertSee(route('places.index'), false);
+    }
+
+    public function test_the_card_directions_button_opens_the_listing_and_starts_the_route(): void
+    {
+        $listing = $this->listingIn($this->city('Lucena City'), 'Route Garage', self::LUCENA);
+
+        $this->get(route('establishments.index'))
+            ->assertOk()
+            ->assertSee(e(route('establishments.show', [$listing, 'directions' => 1])).'#directions', false);
+
+        $this->get(route('establishments.show', [$listing, 'directions' => 1]))
+            ->assertOk()
+            ->assertSee('data-auto="1"', false);
+
+        $this->get(route('establishments.show', $listing))->assertSee('data-auto="0"', false);
     }
 }

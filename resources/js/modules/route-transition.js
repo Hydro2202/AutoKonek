@@ -1,7 +1,10 @@
 /**
- * Page transition: a car drives onto the screen when a link is clicked, and keeps driving
- * off the screen once the next page has loaded. Links, not form submissions, trigger it.
+ * Page transition: a car drives onto the screen and keeps driving off it once the next page has loaded.
+ * It is only used for the essential journeys, a link marked data-transition (for example a listing or a
+ * service category). Every other link and every form behaves normally.
  * Skipped for visitors who prefer reduced motion.
+ *
+ *   <a href="..." data-transition data-rt-label="Sample Fuel Stop">
  */
 const STORAGE_KEY = 'ak-rt';
 const LEAVE_MS = 430;
@@ -55,9 +58,8 @@ export function initRouteTransition() {
         if (reduceMotion || event.defaultPrevented) return;
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 
-        const link = event.target.closest('a[href]');
+        const link = event.target.closest('a[data-transition][href]');
         if (!link || (link.target && link.target !== '_self') || link.hasAttribute('download')) return;
-        if (link.dataset.noTransition !== undefined) return;
 
         const url = new URL(link.href, window.location.href);
         const isSamePage = url.pathname === window.location.pathname && url.search === window.location.search;

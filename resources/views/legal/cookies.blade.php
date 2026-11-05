@@ -45,13 +45,13 @@
             </tbody>
         </table>
     </div>
-    <p>Our fonts, icons and images are served from AutoKonek itself, so no other company sets a cookie on your device while you browse. The exceptions are services you choose to open: the map that loads when you press <strong>Show map</strong> (OpenStreetMap) and the Google Maps, Waze and OpenStreetMap pages opened by the directions buttons. Those sites are not controlled by AutoKonek and have their own cookie policies.</p>
+    <p>Our fonts, icons and images are served from AutoKonek itself, so no other company sets a cookie on your device while you browse. The exceptions are services you choose to open: the route and map that load when you press <strong>Get directions</strong> or <strong>Show map only</strong> (OpenStreetMap services), and the Google Maps, Waze and OpenStreetMap pages opened by the map buttons. Those sites are not controlled by AutoKonek and have their own cookie policies.</p>
 
     <h2 id="we-dont">Cookies we do not use</h2>
     <ul>
         <li>Advertising or marketing cookies.</li>
         <li>Analytics or tracking cookies, from us or from third parties.</li>
-        <li>Social media buttons or third-party widgets that load by themselves. The map only loads when you press Show map.</li>
+        <li>Social media buttons or third-party widgets that load by themselves. The route and map only load when you press Get directions or Show map only.</li>
     </ul>
     <p>Because every cookie above is needed for the site to work, the notice at the bottom of the page asks you to acknowledge them rather than to choose between categories. If we ever add optional cookies, we will ask for your permission first.</p>
 

@@ -1,11 +1,16 @@
 @php
     $columns = [
-        'Explore' => [
-            ['Find services', route('establishments.index')],
-            ['Cities and regions', route('places.index')],
-            ['About AutoKonek', route('about')],
-            ['Contact us', route('contact')],
-        ],
+        (auth()->check() ? 'Explore' : 'Get started') => auth()->check()
+            ? [
+                ['Find services', route('establishments.index')],
+                ['Cities and regions', route('places.index')],
+                ['About AutoKonek', route('about')],
+                ['Contact us', route('contact')],
+            ]
+            : [
+                ['Log in', route('login')],
+                ['Create account', route('register')],
+            ],
         'For businesses' => [
             ['List your business', route('register')],
             ['Owner login', route('login')],
@@ -40,6 +45,6 @@
         @endforeach
     </div>
     <div class="border-t border-white/10 px-4 py-5 text-center text-sm text-white/50">
-        &copy; {{ date('Y') }} AutoKonek, a college project. Demo listings are fictional and are not verified businesses.
+        &copy; {{ date('Y') }} AutoKonek
     </div>
 </footer>

@@ -23,6 +23,8 @@ return new class extends Migration
             // GPS position, used for map directions and "near me" sorting. Optional.
             $table->decimal('latitude', 9, 6)->nullable();
             $table->decimal('longitude', 9, 6)->nullable();
+            // Set only for listings created from OpenStreetMap data, for example "node/123". Used for attribution.
+            $table->string('osm_ref', 40)->nullable();
             $table->string('contact_number', 30)->nullable();
             $table->string('contact_email')->nullable();
             $table->text('opening_hours')->nullable();

@@ -10,6 +10,7 @@ use App\Models\Establishment;
  * No map API key is needed: these are plain links that open the visitor's own maps app.
  * When the listing has GPS coordinates they are used; otherwise the address is searched.
  * Google Maps and Waze start from the visitor's current location by default.
+ * (The in-page route map is drawn by resources/js/modules/route-map.js.)
  */
 class MapLinks
 {
@@ -55,24 +56,6 @@ class MapLinks
         [$lat, $lng] = [$this->establishment->latitude, $this->establishment->longitude];
 
         return "https://www.openstreetmap.org/?mlat={$lat}&mlon={$lng}#map=17/{$lat}/{$lng}";
-    }
-
-    /** Address for the "embedded map" iframe. Only available with coordinates. */
-    public function embedUrl(): ?string
-    {
-        if (! $this->hasCoordinates()) {
-            return null;
-        }
-
-        $lat = (float) $this->establishment->latitude;
-        $lng = (float) $this->establishment->longitude;
-        $box = implode(',', [$lng - 0.006, $lat - 0.004, $lng + 0.006, $lat + 0.004]);
-
-        return 'https://www.openstreetmap.org/export/embed.html?'.http_build_query([
-            'bbox' => $box,
-            'layer' => 'mapnik',
-            'marker' => $lat.','.$lng,
-        ]);
     }
 
     private function coordinates(): string

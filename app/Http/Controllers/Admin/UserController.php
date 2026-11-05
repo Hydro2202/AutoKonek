@@ -20,7 +20,7 @@ class UserController extends Controller
         $users = User::query()
             ->when($filters['q'] ?? null, function ($q, $term) {
                 $like = '%'.addcslashes($term, '%_\\').'%';
-                $q->where(fn ($w) => $w->where('name', 'ilike', $like)->orWhere('email', 'ilike', $like));
+                $q->where(fn ($w) => $w->where('name', 'like', $like)->orWhere('email', 'like', $like));
             })
             ->when($filters['role'] ?? null, fn ($q, $role) => $q->where('role', $role))
             ->when($filters['status'] ?? null, fn ($q, $s) => $q->where('is_active', $s === 'active'))

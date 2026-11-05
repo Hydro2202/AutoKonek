@@ -25,17 +25,21 @@ class PageRenderingTest extends TestCase
         $this->seed([PhilippineLocationSeeder::class, CategorySeeder::class, DemoSeeder::class]);
     }
 
-    public function test_public_and_customer_pages_render(): void
+    public function test_guest_and_customer_pages_render(): void
     {
         $e = Establishment::approved()->first();
         $review = Review::first();
 
-        foreach ([route('home'), route('establishments.index'), route('establishments.show', $e), route('about'), route('contact'), route('places.index'), route('places.index', ['show' => 'all'])] as $url) {
+        // Guests can open the landing page and the legal pages.
+        foreach ([route('home'), route('legal.privacy'), route('legal.terms'), route('legal.cookies'), route('login'), route('register')] as $url) {
             $this->get($url)->assertOk();
         }
 
+        // Everything else needs an account.
         $customer = User::where('email', 'customer1@autokonek.test')->first();
         foreach ([
+            route('home'), route('establishments.index'), route('about'), route('contact'),
+            route('places.index'), route('places.index', ['show' => 'all']),
             route('establishments.show', $e), route('customer.reviews'), route('customer.reports'), route('profile.edit'),
             route('reports.create', ['type' => 'establishment', 'id' => $e->id]),
             route('reports.create', ['type' => 'review', 'id' => $review->id]),
@@ -71,7 +75,7 @@ class PageRenderingTest extends TestCase
     {
         $owner1 = User::where('email', 'owner1@autokonek.test')->first();
         $mine = $owner1->establishments()->first();
-        $theirs = Establishment::where('user_id', '!=', $owner1->id)->first();
+        $theirs = Establishment::where('user_id', '!=', $owner1->id)->has('services')->first();
         $theirService = $theirs->services()->first();
 
         // Mixing a service from another listing under my own listing's URL must fail.
@@ -106,5 +110,48 @@ class PageRenderingTest extends TestCase
         $this->assertGreaterThan(0, Establishment::where('status', 'pending')->count());
         $this->assertGreaterThan(0, Establishment::where('status', 'rejected')->count());
         $this->assertGreaterThan(0, Report::count());
+    }
+
+    public function test_the_demo_listings_are_real_places_from_openstreetmap(): void
+    {
+        $real = Establishment::whereNotNull('osm_ref')->get();
+
+        $this->assertGreaterThanOrEqual(20, $real->count());
+        $this->assertSame(['approved'], $real->pluck('status')->unique()->all());
+
+        // Real gas stations around Lucena City, with a street and a GPS pin.
+        $gas = $real->filter(fn ($e) => $e->category->slug === 'gas-stations');
+        $this->assertGreaterThanOrEqual(6, $gas->count());
+        foreach (['Petron', 'Shell', 'Caltex'] as $brand) {
+            $this->assertTrue($gas->contains('name', $brand), "$brand is missing");
+        }
+        $this->assertTrue($real->every(fn ($e) => $e->hasCoordinates() && filled($e->address)));
+
+        // Nothing is invented for real businesses: no reviews, prices or opening hours unless the map has them.
+        $this->assertSame(0, Review::whereIn('establishment_id', $real->pluck('id'))->count());
+        $this->assertSame(0, Service::whereIn('establishment_id', $real->pluck('id'))->count());
+
+        // Every category has at least one real place.
+        $this->assertSame(6, $real->pluck('category_id')->unique()->count());
+    }
+
+    public function test_real_listings_credit_openstreetmap_and_the_sample_garage_is_labelled_fictional(): void
+    {
+        $this->actingAs(User::where('email', 'customer1@autokonek.test')->first());
+
+        $petron = Establishment::whereNotNull('osm_ref')->where('name', 'Petron')->first();
+        $this->get(route('establishments.show', $petron))
+            ->assertOk()
+            ->assertSee('OpenStreetMap contributors')
+            ->assertSee('has not claimed it yet');
+
+        $sample = Establishment::where('name', 'AutoKonek Sample Garage')->first();
+        $this->assertNull($sample->osm_ref);
+        $this->get(route('establishments.show', $sample))->assertOk()->assertSee('not a real business')->assertDontSee('has not claimed it yet');
+    }
+
+    public function test_the_footer_shows_only_the_website_name(): void
+    {
+        $this->get(route('home'))->assertOk()->assertSee('&copy; '.date('Y').' AutoKonek', false)->assertDontSee('college project')->assertDontSee('fictional');
     }
 }

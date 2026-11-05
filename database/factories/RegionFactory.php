@@ -15,7 +15,8 @@ class RegionFactory extends Factory
         $name = fake()->unique()->words(2, true);
 
         return [
-            'psgc_code' => fake()->unique()->numerify('##0000000'),
+            // Test codes start with TST so they can never clash with real PSGC codes.
+            'psgc_code' => 'TST'.fake()->unique()->numerify('#######'),
             'name' => ucwords($name),
             'official_name' => ucwords($name),
             'island_group' => fake()->randomElement(['luzon', 'visayas', 'mindanao']),

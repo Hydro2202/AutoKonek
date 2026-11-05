@@ -13,7 +13,7 @@
 
         <h3 class="mt-0.5 text-[1.6rem]">
             {{-- The title link stretches over the whole card. --}}
-            <a href="{{ route('establishments.show', $establishment) }}" class="after:absolute after:inset-0 after:z-[1] hover:text-steel">{{ $establishment->name }}</a>
+            <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}" class="after:absolute after:inset-0 after:z-[1] hover:text-steel">{{ $establishment->name }}</a>
         </h3>
 
         <p class="mt-1.5 flex items-start gap-1.5 text-[0.9375rem] text-muted">
@@ -38,8 +38,8 @@
                 </span>
             </div>
             <div class="relative z-[2] flex items-center gap-2">
-                <a href="{{ $establishment->mapLinks()->googleDirections() }}" target="_blank" rel="noopener" data-no-transition
-                   class="btn-outline btn-sm" title="Open directions in Google Maps" aria-label="Directions to {{ $establishment->name }} (opens Google Maps)">
+                <a href="{{ route('establishments.show', [$establishment, 'directions' => 1]) }}#directions" data-transition data-rt-label="{{ $establishment->name }}"
+                   class="btn-outline btn-sm" title="Show the route from where you are" aria-label="Directions to {{ $establishment->name }}">
                     <x-ui.icon name="navigation" class="size-3.5" /> Directions
                 </a>
                 <span class="btn-navy btn-sm pointer-events-none">Details <x-ui.icon name="arrow-right" class="size-3.5" /></span>

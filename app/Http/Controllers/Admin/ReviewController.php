@@ -19,9 +19,9 @@ class ReviewController extends Controller
         $reviews = Review::with(['user', 'establishment'])
             ->when($filters['q'] ?? null, function ($q, $term) {
                 $like = '%'.addcslashes($term, '%_\\').'%';
-                $q->where(fn ($w) => $w->where('comment', 'ilike', $like)
-                    ->orWhereHas('user', fn ($u) => $u->where('name', 'ilike', $like))
-                    ->orWhereHas('establishment', fn ($e) => $e->where('name', 'ilike', $like)));
+                $q->where(fn ($w) => $w->where('comment', 'like', $like)
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $like))
+                    ->orWhereHas('establishment', fn ($e) => $e->where('name', 'like', $like)));
             })
             ->when($filters['rating'] ?? null, fn ($q, $r) => $q->where('rating', $r))
             ->latest()->paginate(15)->withQueryString();

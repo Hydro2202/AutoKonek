@@ -190,4 +190,39 @@ class ReviewAndReportTest extends TestCase
         $this->actingAs($admin)->delete(route('admin.reviews.destroy', $review))->assertRedirect();
         $this->assertModelMissing($review);
     }
+
+    public function test_the_database_allows_only_one_open_report_per_user_and_target(): void
+    {
+        $reporter = User::factory()->create();
+        $e = Establishment::factory()->create();
+        $insert = fn (string $status) => DB::table('reports')->insert([
+            'user_id' => $reporter->id, 'establishment_id' => $e->id, 'reason' => 'spam',
+            'status' => $status, 'created_at' => now(), 'updated_at' => now(),
+        ]);
+
+        // Closed reports can pile up...
+        $insert('resolved');
+        $insert('dismissed');
+        $insert('resolved');
+        // ...but only one report can be open at a time.
+        $insert('pending');
+
+        $this->assertSame(4, DB::table('reports')->where('user_id', $reporter->id)->count());
+
+        $this->expectException(QueryException::class);
+        $insert('pending');
+    }
+
+    public function test_the_database_rejects_a_report_with_two_targets(): void
+    {
+        $user = User::factory()->create();
+        $e = Establishment::factory()->create();
+        $review = Review::factory()->create();
+
+        $this->expectException(QueryException::class);
+        DB::table('reports')->insert([
+            'user_id' => $user->id, 'establishment_id' => $e->id, 'review_id' => $review->id,
+            'reason' => 'spam', 'status' => 'pending', 'created_at' => now(), 'updated_at' => now(),
+        ]);
+    }
 }
