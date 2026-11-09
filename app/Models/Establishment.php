@@ -169,12 +169,22 @@ class Establishment extends Model
         ])->filter()->implode(', ');
     }
 
-    /** Primary uploaded image, or a local category placeholder. */
+    /** Primary uploaded image, or a local category placeholder (JPG preferred over SVG). */
     public function imageUrl(): string
     {
         $image = $this->images->firstWhere('is_primary', true) ?? $this->images->first();
 
-        return $image ? $image->url() : asset('images/placeholders/'.($this->category?->slug ?? 'default').'.svg');
+        if ($image) {
+            return $image->url();
+        }
+
+        $slug = $this->category?->slug ?? 'default';
+
+        if (file_exists(public_path("images/placeholders/{$slug}.jpg"))) {
+            return asset("images/placeholders/{$slug}.jpg");
+        }
+
+        return asset("images/placeholders/{$slug}.svg");
     }
 
     public static function uniqueSlug(string $name, ?int $ignoreId = null): string

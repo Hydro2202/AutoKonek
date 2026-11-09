@@ -22,9 +22,9 @@ return new class extends Migration
             $table->timestamps();
 
             // 1 while a report is open (pending), NULL once it is resolved or dismissed.
-            // MySQL treats NULLs in a unique index as different, so the two unique indexes
-            // below only apply to open reports: one open report per user per target.
-            $table->unsignedTinyInteger('open_flag')->nullable()->virtualAs("IF(status = 'pending', 1, NULL)");
+            // PostgreSQL treats NULLs in a unique index as distinct values, so the two unique
+            // indexes below only apply to open reports: one open report per user per target.
+            $table->unsignedTinyInteger('open_flag')->nullable()->storedAs("CASE WHEN status = 'pending' THEN 1 ELSE NULL END");
 
             $table->index('status');
             $table->unique(['user_id', 'establishment_id', 'open_flag'], 'reports_open_establishment_unique');
@@ -34,22 +34,36 @@ return new class extends Migration
         DB::statement("ALTER TABLE reports ADD CONSTRAINT reports_status_check CHECK (status IN ('pending', 'resolved', 'dismissed'))");
 
         // A report must point at exactly one target: an establishment OR a review.
-        // (MySQL does not allow a CHECK on columns whose foreign keys cascade, so a trigger enforces it.)
-        foreach (['INSERT', 'UPDATE'] as $event) {
-            DB::unprepared("
-                CREATE TRIGGER reports_single_target_before_{$event}
-                BEFORE {$event} ON reports FOR EACH ROW
-                BEGIN
-                    IF (NEW.establishment_id IS NULL) = (NEW.review_id IS NULL) THEN
-                        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A report needs exactly one target: an establishment or a review.';
-                    END IF;
-                END
-            ");
-        }
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION reports_single_target_check()
+            RETURNS TRIGGER AS \$\$
+            BEGIN
+                IF (NEW.establishment_id IS NULL) = (NEW.review_id IS NULL) THEN
+                    RAISE EXCEPTION 'A report needs exactly one target: an establishment or a review.';
+                END IF;
+                RETURN NEW;
+            END;
+            \$\$ LANGUAGE plpgsql;
+        ");
+
+        DB::unprepared('
+            CREATE TRIGGER reports_single_target_before_insert
+            BEFORE INSERT ON reports FOR EACH ROW
+            EXECUTE FUNCTION reports_single_target_check();
+        ');
+
+        DB::unprepared('
+            CREATE TRIGGER reports_single_target_before_update
+            BEFORE UPDATE ON reports FOR EACH ROW
+            EXECUTE FUNCTION reports_single_target_check();
+        ');
     }
 
     public function down(): void
     {
+        DB::unprepared('DROP TRIGGER IF EXISTS reports_single_target_before_update ON reports');
+        DB::unprepared('DROP TRIGGER IF EXISTS reports_single_target_before_insert ON reports');
+        DB::unprepared('DROP FUNCTION IF EXISTS reports_single_target_check()');
         Schema::dropIfExists('reports');
     }
 };
