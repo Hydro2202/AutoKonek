@@ -13,7 +13,7 @@
     ] as [$label, $value, $note])
         <div class="p-5">
             <dt class="text-sm font-semibold text-muted">{{ $label }}</dt>
-            <dd class="mt-1 font-display text-5xl leading-none font-semibold text-navy" data-count-up="{{ $value }}">{{ $value }}</dd>
+            <dd class="mt-1 font-display text-5xl leading-none font-semibold text-navy">{{ $value }}</dd>
             <dd class="mt-1.5 text-sm text-muted">{{ $note }}</dd>
         </div>
     @endforeach
@@ -44,7 +44,7 @@
         @else
             <ul class="space-y-3">
                 @foreach ($establishments as $e)
-                    <li class="anim-rise flex flex-wrap items-center gap-x-5 gap-y-3 rounded-lg border border-line bg-white p-4" style="--i: {{ $loop->index }}">
+                    <li class="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-lg border border-line bg-white p-4">
                         <img src="{{ $e->imageUrl() }}" alt="" class="size-16 shrink-0 rounded-md object-cover">
                         <div class="min-w-0 flex-1 basis-48">
                             <p class="truncate font-display text-2xl font-semibold text-navy">{{ $e->name }}</p>

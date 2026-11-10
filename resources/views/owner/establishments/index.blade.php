@@ -15,7 +15,7 @@
 @else
     <ul class="space-y-4">
         @foreach ($establishments as $e)
-            <li class="anim-rise rounded-lg border border-line bg-white p-5" style="--i: {{ $loop->index }}">
+            <li class="rounded-lg border border-line bg-white p-5">
                 <div class="flex flex-wrap items-start gap-x-5 gap-y-4">
                     <img src="{{ $e->imageUrl() }}" alt="" class="size-20 shrink-0 rounded-md object-cover">
                     <div class="min-w-0 flex-1 basis-56">

@@ -9,8 +9,6 @@ import { initRouteTransition } from './modules/route-transition';
 import { initLocationPicker } from './modules/location-picker';
 import { initGeolocation } from './modules/geolocation';
 import { initRouteMap } from './modules/route-map';
-import { initCountUp } from './modules/count-up';
-import { initReveal } from './modules/reveal';
 
 document.addEventListener('DOMContentLoaded', () => {
     initRouteTransition();
@@ -24,6 +22,4 @@ document.addEventListener('DOMContentLoaded', () => {
     initLocationPicker();
     initGeolocation();
     initRouteMap();
-    initCountUp();
-    initReveal();
 });

@@ -36,7 +36,7 @@ class PageRenderingTest extends TestCase
         }
 
         // Everything else needs an account.
-        $customer = User::where('email', 'customer@gmail.com')->first();
+        $customer = User::where('email', 'customer1@autokonek.test')->first();
         foreach ([
             route('home'), route('establishments.index'), route('about'), route('contact'),
             route('places.index'), route('places.index', ['show' => 'all']),
@@ -50,7 +50,7 @@ class PageRenderingTest extends TestCase
 
     public function test_owner_pages_render(): void
     {
-        $owner = User::where('email', 'user1@gmail.com')->first();
+        $owner = User::where('email', 'owner1@autokonek.test')->first();
         $e = $owner->establishments()->first();
 
         foreach ([
@@ -73,7 +73,7 @@ class PageRenderingTest extends TestCase
 
     public function test_owner_cannot_touch_another_owners_service(): void
     {
-        $owner1 = User::where('email', 'user1@gmail.com')->first();
+        $owner1 = User::where('email', 'owner1@autokonek.test')->first();
         $mine = $owner1->establishments()->first();
         $theirs = Establishment::where('user_id', '!=', $owner1->id)->has('services')->first();
         $theirService = $theirs->services()->first();
@@ -137,7 +137,7 @@ class PageRenderingTest extends TestCase
 
     public function test_real_listings_credit_openstreetmap_and_the_sample_garage_is_labelled_fictional(): void
     {
-        $this->actingAs(User::where('email', 'customer@gmail.com')->first());
+        $this->actingAs(User::where('email', 'customer1@autokonek.test')->first());
 
         $petron = Establishment::whereNotNull('osm_ref')->where('name', 'Petron')->first();
         $this->get(route('establishments.show', $petron))

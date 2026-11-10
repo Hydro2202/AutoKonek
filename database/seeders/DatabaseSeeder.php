@@ -18,8 +18,5 @@ class DatabaseSeeder extends Seeder
         if (! app()->isProduction()) {
             $this->call(DemoSeeder::class);
         }
-
-        // Real places from all over the Philippines (OpenStreetMap). Safe for production.
-        $this->call(NationwidePlacesSeeder::class);
     }
 }

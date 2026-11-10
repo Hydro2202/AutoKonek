@@ -11,29 +11,20 @@
                 ['Log in', route('login')],
                 ['Create account', route('register')],
             ],
-        // Only for visitors who might list a business, and for owners.
-        'For businesses' => match (true) {
-            ! auth()->check() => [
-                ['List your business', route('register')],
-                ['Owner login', route('login')],
-            ],
-            auth()->user()->isOwner() => [
-                ['My dashboard', route('owner.dashboard')],
-                ['Add establishment', route('owner.establishments.create')],
-            ],
-            default => null,
-        },
+        'For businesses' => [
+            ['List your business', route('register')],
+            ['Owner login', route('login')],
+        ],
         'Legal' => [
             ['Privacy Policy', route('legal.privacy')],
             ['Terms of Service', route('legal.terms')],
             ['Cookie Policy', route('legal.cookies')],
         ],
     ];
-    $columns = array_filter($columns);
 @endphp
 <footer class="bg-navy-950 text-white/75">
-    <div class="roadline draw-line mx-auto max-w-7xl"></div>
-    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(var(--cols),1fr)]" style="--cols: {{ count($columns) }}">
+    <div class="roadline mx-auto max-w-7xl"></div>
+    <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_repeat(3,1fr)]">
         <div>
             <x-brand.logo :light="true" />
             <p class="mt-4 max-w-xs text-[0.9375rem] leading-relaxed">Find the services your vehicle needs. Gas, wash, repair, tires, parking and batteries, all in one directory.</p>

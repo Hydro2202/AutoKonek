@@ -6,6 +6,6 @@
         <span class="text-sm font-medium text-muted">{{ $label }}</span>
         <span class="flex size-8 items-center justify-center rounded-[5px] {{ $alert ? 'bg-accent-100 text-accent-600' : 'bg-steel-50 text-steel' }}"><x-ui.icon :name="$icon" class="size-4" /></span>
     </div>
-    <p class="mt-3 text-3xl leading-none font-semibold tracking-tight text-navy" data-count-up="{{ $value }}">{{ number_format($value) }}</p>
+    <p class="mt-3 text-3xl leading-none font-semibold tracking-tight text-navy">{{ number_format($value) }}</p>
     @if ($note)<p class="delta mt-2">{{ $note }}</p>@endif
 </{{ $href ? 'a' : 'div' }}>

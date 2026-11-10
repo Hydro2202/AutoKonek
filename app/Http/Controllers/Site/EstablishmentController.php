@@ -45,7 +45,7 @@ class EstablishmentController extends Controller
             // Unrated listings sort last; ties broken by review count.
             ($filters['sort'] ?? null) === 'rating' => $query->orderByRaw('reviews_avg_rating IS NULL')->orderByDesc('reviews_avg_rating')->orderByDesc('reviews_count'),
             ($filters['sort'] ?? null) === 'nearest' && $hasPosition => $query->orderByRaw('distance_km IS NULL')->orderBy('distance_km')->orderBy('name'),
-            default => $query->latest()->orderByDesc('id'),
+            default => $query->latest(),
         };
 
         $establishments = $query->paginate(config('autokonek.pagination.directory'))->withQueryString();

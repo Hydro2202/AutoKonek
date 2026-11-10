@@ -18,7 +18,7 @@
         <button type="button" data-toggle="#sidebar" aria-expanded="false" aria-controls="sidebar" class="rounded-sign p-2 text-white hover:bg-white/10" aria-label="Menu"><x-ui.icon name="menu" class="size-6" /></button>
     </div>
 
-    <aside id="sidebar" class="anim-menu hidden flex-col border-r border-line bg-white lg:sticky lg:top-0 lg:flex lg:h-screen">
+    <aside id="sidebar" class="hidden flex-col border-r border-line bg-white lg:sticky lg:top-0 lg:flex lg:h-screen">
         <div class="hidden px-6 pt-6 pb-5 lg:block"><a href="{{ route('home') }}" aria-label="AutoKonek home"><x-brand.logo /></a></div>
 
         <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-3" aria-label="Business owner">

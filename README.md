@@ -140,18 +140,16 @@ php artisan db:seed --class=AdminSeeder
 
 > **Do not use these in production.** Demo data is only seeded when `APP_ENV` is not `production`.
 
-All demo accounts use the password `password123`:
+All demo accounts use the password `password`:
 
 | Role | Email |
 |---|---|
-| Administrator | `admin@gmail.com` (from `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`) |
-| Business owner 1 | `user1@gmail.com` |
-| Business owner 2 | `user2@gmail.com` |
-| Customer | `customer@gmail.com` |
+| Business owner | `owner1@autokonek.test`, `owner2@autokonek.test` |
+| Customer | `customer1@autokonek.test` ... `customer4@autokonek.test` |
 
-Three more customers (`customer2@autokonek.test` to `customer4@autokonek.test`) write the sample reviews.
+The administrator uses whatever you set in `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-Most demo listings are real places taken from OpenStreetMap. "AutoKonek Sample Garage" and the pending and rejected listings are fictional and exist to demonstrate reviews, reports and the approval workflow.
+The demo establishments (for example "Demo Sparkle Car Wash") are **fictional** and are not real businesses. They include approved, pending and rejected listings, sample reviews and sample reports.
 
 ## Security notes
 
@@ -194,7 +192,7 @@ AutoKonek is based in **Lucena City, Quezon** (change it in `config/autokonek.ph
 The car transition is used only for the essential journeys: opening a listing or a service category. A car drives along a road past roadside place signs and keeps going once the next page has loaded, with "Heading to <name>" under it. Every other link and form behaves normally. A link opts in with `data-transition` (and an optional `data-rt-label`). It is skipped for visitors who prefer reduced motion. The code is in `resources/js/modules/route-transition.js` and `resources/css/components/transition.css`.
 ## Design system
 
-Road-signage and workshop vocabulary: navy asphalt, one orange "center line", square sign tiles, license-plate ratings and job-card listing tickets. Headings use Barlow Condensed, body text Barlow, and the admin area IBM Plex Sans. Design tokens live in `resources/css/theme.css`. Motion is limited to things that explain something: the homepage service board, dashboard numbers counting up, rating bars and chart columns growing, a soft pulse on listings waiting for review, menus and dialogs opening, toasts with a timer, results rising in after a search, road lines drawing in, and loading lines on buttons. Everything is switched off for visitors who prefer reduced motion.
+Road-signage and workshop vocabulary: navy asphalt, one orange "center line", square sign tiles, license-plate ratings and job-card listing tickets. Headings use Barlow Condensed, body text Barlow, and the admin area IBM Plex Sans. Design tokens live in `resources/css/theme.css`. Motion is limited to the homepage service board, toasts, the cookie banner, dialogs and button loading states, and it is switched off for visitors who prefer reduced motion.
 
 ## Project structure
 
