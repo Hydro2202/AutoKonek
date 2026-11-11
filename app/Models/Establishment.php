@@ -103,13 +103,14 @@ class Establishment extends Model
             return $query;
         }
 
-        // LIKE is case-insensitive with MySQL's default collation. Escape wildcards typed by the user.
+        // SQLite's LIKE ignores case for English letters. Wildcards typed by the user are
+        // escaped with a backslash, and SQLite needs ESCAPE to treat it as the escape character.
         $like = '%'.addcslashes($term, '%_\\').'%';
 
         return $query->where(fn (Builder $q) => $q
-            ->where('name', 'like', $like)
-            ->orWhere('description', 'like', $like)
-            ->orWhere('address', 'like', $like));
+            ->whereRaw("name LIKE ? ESCAPE '\\'", [$like])
+            ->orWhereRaw("description LIKE ? ESCAPE '\\'", [$like])
+            ->orWhereRaw("address LIKE ? ESCAPE '\\'", [$like]));
     }
 
     /** Filter by the place the business is in. Any combination of region, province and city. */

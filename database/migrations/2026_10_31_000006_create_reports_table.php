@@ -1,8 +1,8 @@
 <?php
 
+use App\Support\SqliteCheck;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
 
             // 1 while a report is open (pending), NULL once it is resolved or dismissed.
-            // PostgreSQL treats NULLs in a unique index as distinct values, so the two unique
+            // SQLite treats NULLs in a unique index as distinct values, so the two unique
             // indexes below only apply to open reports: one open report per user per target.
             $table->unsignedTinyInteger('open_flag')->nullable()->storedAs("CASE WHEN status = 'pending' THEN 1 ELSE NULL END");
 
@@ -31,39 +31,15 @@ return new class extends Migration
             $table->unique(['user_id', 'review_id', 'open_flag'], 'reports_open_review_unique');
         });
 
-        DB::statement("ALTER TABLE reports ADD CONSTRAINT reports_status_check CHECK (status IN ('pending', 'resolved', 'dismissed'))");
+        SqliteCheck::add('reports', 'reports_status_check', "NEW.status IN ('pending', 'resolved', 'dismissed')", 'A report status must be pending, resolved or dismissed.');
 
         // A report must point at exactly one target: an establishment OR a review.
-        DB::unprepared("
-            CREATE OR REPLACE FUNCTION reports_single_target_check()
-            RETURNS TRIGGER AS \$\$
-            BEGIN
-                IF (NEW.establishment_id IS NULL) = (NEW.review_id IS NULL) THEN
-                    RAISE EXCEPTION 'A report needs exactly one target: an establishment or a review.';
-                END IF;
-                RETURN NEW;
-            END;
-            \$\$ LANGUAGE plpgsql;
-        ");
-
-        DB::unprepared('
-            CREATE TRIGGER reports_single_target_before_insert
-            BEFORE INSERT ON reports FOR EACH ROW
-            EXECUTE FUNCTION reports_single_target_check();
-        ');
-
-        DB::unprepared('
-            CREATE TRIGGER reports_single_target_before_update
-            BEFORE UPDATE ON reports FOR EACH ROW
-            EXECUTE FUNCTION reports_single_target_check();
-        ');
+        SqliteCheck::add('reports', 'reports_single_target_check', '(NEW.establishment_id IS NULL) <> (NEW.review_id IS NULL)', 'A report needs exactly one target: an establishment or a review.');
     }
 
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS reports_single_target_before_update ON reports');
-        DB::unprepared('DROP TRIGGER IF EXISTS reports_single_target_before_insert ON reports');
-        DB::unprepared('DROP FUNCTION IF EXISTS reports_single_target_check()');
+        // Dropping the table also drops its triggers.
         Schema::dropIfExists('reports');
     }
 };

@@ -12,8 +12,8 @@
         <p class="text-sm font-semibold text-steel">{{ $establishment->category?->name }}</p>
 
         <h3 class="mt-0.5 text-[1.6rem]">
-            {{-- The title link stretches over the whole card. --}}
-            <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}" class="after:absolute after:inset-0 after:z-[1] hover:text-steel">{{ $establishment->name }}</a>
+            {{-- The title link stretches over the whole card (see .ticket-link), so the card is clickable anywhere. --}}
+            <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}" class="ticket-link hover:text-steel">{{ $establishment->name }}</a>
         </h3>
 
         <p class="mt-1.5 flex items-start gap-1.5 text-[0.9375rem] text-muted">

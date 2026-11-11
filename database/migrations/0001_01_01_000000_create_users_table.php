@@ -1,8 +1,8 @@
 <?php
 
+use App\Support\SqliteCheck;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement("ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('customer', 'business_owner', 'admin'))");
+        SqliteCheck::add('users', 'users_role_check', "NEW.role IN ('customer', 'business_owner', 'admin')", 'A user role must be customer, business_owner or admin.');
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

@@ -64,6 +64,17 @@
                 @endforeach
             </div>
         @endif
+
+        {{-- Photos from free sources must credit their author and licence. --}}
+        @foreach ($images->take($count <= 1 ? 1 : 5)->whereNotNull('credit') as $image)
+            <p class="mt-2 text-xs text-muted">
+                @if ($image->credit_url)
+                    <a href="{{ $image->credit_url }}" target="_blank" rel="noopener" class="underline underline-offset-2 hover:text-navy">{{ $image->credit }}</a>
+                @else
+                    {{ $image->credit }}
+                @endif
+            </p>
+        @endforeach
     </div>
 
     <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_21rem]">

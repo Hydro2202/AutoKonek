@@ -1,2 +1,5 @@
 *
 !.gitignore
+# Listing photos are kept in git so they move with database/database.sqlite.
+!establishments/
+!establishments/**

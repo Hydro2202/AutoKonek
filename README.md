@@ -4,13 +4,13 @@
 
 AutoKonek lets vehicle owners search gas stations, car washes, repair shops, tire shops, parking facilities and battery services, read ratings and reviews, and report bad listings. Business owners submit and manage their establishments; administrators approve listings and moderate the platform.
 
-Built with the Laravel framework (Laravel 13, PHP 8.4) using the **MVC** pattern, a **MySQL** database, Blade, Tailwind CSS 4 and Vite. This is a college final project.
+Built with the Laravel framework (Laravel 13, PHP 8.4) using the **MVC** pattern, a **SQLite** database (a single file kept in the project), Blade, Tailwind CSS 4 and Vite. This is a college final project.
 
 ## What it solves, and where the CRUD is
 
 Finding a trustworthy gas station, car wash, repair shop, tire shop, parking lot or battery service usually means calling around or asking friends. AutoKonek puts verified local listings, prices, reviews and directions in one place, and gives small businesses a simple way to maintain their listing.
 
-Every feature follows Laravel's MVC structure: **Models** (`app/Models`) talk to MySQL through Eloquent, **Controllers** (`app/Http/Controllers`) handle requests, and **Views** (`resources/views`, Blade) render the pages.
+Every feature follows Laravel's MVC structure: **Models** (`app/Models`) talk to the SQLite database through Eloquent, **Controllers** (`app/Http/Controllers`) handle requests, and **Views** (`resources/views`, Blade) render the pages.
 
 | Data | Create | Read | Update | Delete |
 |---|---|---|---|---|
@@ -41,10 +41,11 @@ Every feature follows Laravel's MVC structure: **Models** (`app/Models`) talk to
 
 ## Requirements
 
-- PHP 8.3+ with extensions: `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `gd`, `zip`, `curl`
+- PHP 8.4+ with extensions: `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl`, `fileinfo`, `gd`, `zip`, `curl`
 - Composer 2
 - Node.js 20+ and npm
-- MySQL 8.0.16 or newer (8.4 is what AutoKonek is tested on). MySQL 8.0.16+ is needed because the database enforces `CHECK` constraints.
+
+No database server is needed. AutoKonek uses **SQLite**: the whole database is one file, `database/database.sqlite`, and it is committed to git. Copy or clone the project to another computer and all the accounts, listings, reviews and reports come with it. Uploaded listing photos (`storage/app/public/establishments/`) are committed too.
 
 ## Installation
 
@@ -55,17 +56,16 @@ composer install
 npm install
 ```
 
-### 2. Create the databases
+### 2. Enable SQLite in PHP
 
-Using the `mysql` command line client (it asks for the root password):
+Open your `php.ini` (`php --ini` shows where it is) and remove the `;` in front of these two lines:
 
-```bash
-mysql -u root -p -e "CREATE DATABASE autokonek CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE DATABASE autokonek_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+extension=pdo_sqlite
+extension=sqlite3
 ```
 
-You can also create the two databases in phpMyAdmin or MySQL Workbench. If you use XAMPP or Laragon, start MySQL from their control panel first.
-
-`autokonek_test` is used only by the automated tests. **Never point the tests at a database that holds real data**: the tests wipe it.
+Check with `php -m`: both `pdo_sqlite` and `sqlite3` should be listed.
 
 ### 3. Configure the environment
 
@@ -77,12 +77,7 @@ php artisan key:generate
 Edit `.env`:
 
 ```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=autokonek
-DB_USERNAME=root
-DB_PASSWORD=your_mysql_password
+DB_CONNECTION=sqlite
 
 ADMIN_NAME="AutoKonek Admin"
 ADMIN_EMAIL=you@example.com
@@ -91,17 +86,19 @@ ADMIN_PASSWORD=choose_a_strong_password
 
 `.env` is git-ignored. Never commit it.
 
-### 4. Run migrations and seeders
+### 4. The database
+
+`database/database.sqlite` already contains the tables and data, so on a copied or cloned project there is nothing to do. Run `php artisan migrate` after pulling changes that add migrations.
+
+To build a brand-new database from scratch:
 
 ```bash
-php artisan migrate --seed
+php artisan migrate:fresh --seed
 ```
 
-This creates the tables, the six default categories, and the first administrator from `ADMIN_EMAIL` / `ADMIN_PASSWORD`. If those are empty, no administrator is created.
+This **erases everything in `database/database.sqlite`**, then creates the tables, the six default categories, and the first administrator from `ADMIN_EMAIL` / `ADMIN_PASSWORD`. If those are empty, no administrator is created. When `APP_ENV` is not `production`, it also loads **fictional demo data** (see below).
 
-When `APP_ENV` is not `production`, it also loads **fictional demo data** (see below).
-
-To start over completely: `php artisan migrate:fresh --seed`.
+To move your data to another computer, commit `database/database.sqlite` (and any new photos under `storage/app/public/establishments/`) and push, or just copy the project folder. Stop `php artisan serve` first so the file is not half-written.
 
 ### 5. Create the storage symlink
 
@@ -126,7 +123,7 @@ While developing styles, run `npm run dev` in a second terminal instead of `npm 
 php artisan test
 ```
 
-Tests use the `autokonek_test` MySQL database (configured in `phpunit.xml`; the password comes from your `.env`).
+Tests use a temporary in-memory SQLite database (configured in `phpunit.xml`), so they never touch `database/database.sqlite`.
 
 ## First administrator
 
@@ -159,7 +156,7 @@ The demo establishments (for example "Demo Sparkle Car Wash") are **fictional** 
 - Owners can only touch their own establishments (policy check plus route scoping for nested services and images).
 - Uploads: JPG/PNG/WebP only, max 2 MB, stored under a random generated file name.
 - User text is escaped by Blade. All queries go through Eloquent or bindings.
-- MySQL constraints back up the rules: role/status/rating/coordinate `CHECK`s, unique reviews per user and establishment, a report must reference exactly one target (enforced by a trigger), and only one open report per user per target (a unique index over a generated column).
+- Database rules back up the application: role/status/rating/coordinate checks and "a report must reference exactly one target" (SQLite triggers, see `app/Support/SqliteCheck.php`), unique reviews per user and establishment, and only one open report per user per target (a unique index over a generated column).
 
 This has been checked by automated tests, but no automated test suite proves an application is completely secure.
 
@@ -180,7 +177,7 @@ AutoKonek is based in **Lucena City, Quezon** (change it in `config/autokonek.ph
 - **Structured location.** A listing stores its city (which determines its province and region), an optional barangay, and the street address. Owners pick the place with region, province and city selectors; Metro Manila has no provinces, so its cities are listed directly. New listings start in Lucena City.
 - **Browse by place.** `/places` lists every region with its cities (or every city and municipality), with listing counts. The directory can be filtered by region, province and city.
 - **Directions on the page.** "Get directions" on a listing (or the Directions button on a listing card) asks the browser for the visitor's GPS position, then draws the real driving route on a map, with the road distance, the estimated time and turn-by-turn steps. The route comes from the public OSRM routing service, and the map is made of OpenStreetMap tile pictures with the route drawn over them (`resources/js/modules/route-map.js`), so no map API key or extra library is needed. Nothing is requested until the visitor clicks, and "Show map only" shows just the place.
-- **Map apps.** Each listing also has "Open in Google Maps", "Open in Waze" and "OpenStreetMap" links. After a route is shown, the Google Maps link carries the visitor's starting point so it shows the same route. Listings with a GPS pin use the exact position; others search the address.- **GPS.** "Near me" in the directory asks the browser for the visitor's position and sorts by distance (straight-line distance, calculated in MySQL). Owners can fill in their business's latitude and longitude with "Use my current location". Browsers require HTTPS (or `localhost`) for location access.
+- **Map apps.** Each listing also has "Open in Google Maps", "Open in Waze" and "OpenStreetMap" links. After a route is shown, the Google Maps link carries the visitor's starting point so it shows the same route. Listings with a GPS pin use the exact position; others search the address.- **GPS.** "Near me" in the directory asks the browser for the visitor's position and sorts by distance (straight-line distance, calculated in the database; the math functions SQLite needs are registered by `app/Support/SqliteMathFunctions.php`). Owners can fill in their business's latitude and longitude with "Use my current location". Browsers require HTTPS (or `localhost`) for location access.
 
 ## Who can open what
 
@@ -229,19 +226,13 @@ tests/Feature/       Automated tests
 
 **`php` or `composer` is not recognized.** Close and reopen your terminal (and VS Code) so it picks up the new PATH.
 
-**`could not find driver` / `PDOException`.** Enable MySQL in `php.ini` by removing the `;` before `extension=pdo_mysql`, then check with `php -m`.
+**`could not find driver` / `PDOException`.** Enable SQLite in `php.ini` (step 2), then check with `php -m`.
 
-**`SQLSTATE[HY000] [2002] No connection could be made`.** MySQL is not running or the port is wrong. Start the MySQL service (or XAMPP/Laragon), and check that `DB_HOST` / `DB_PORT` match. Test with `mysql -u root -p -h 127.0.0.1`.
+**`Database file at path [...] does not exist`.** `database/database.sqlite` is missing. Get it from git (`git checkout database/database.sqlite`), or create an empty file and run `php artisan migrate:fresh --seed`.
 
-**`SQLSTATE[HY000] [1045] Access denied for user`.** `DB_USERNAME` or `DB_PASSWORD` in `.env` is wrong. After editing `.env`, run `php artisan config:clear`.
+**Settings in `.env` seem ignored.** Run `php artisan config:clear`.
 
-**`Unknown database "autokonek"`.** Create the database (step 2).
-
-**`CHECK constraint` errors when migrating.** Your MySQL is older than 8.0.16 and does not enforce `CHECK` constraints. Upgrade MySQL.
-
-**`database "autokonek" does not exist`.** Create it (step 2).
-
-**Tests fail with `database "autokonek_test" does not exist`.** Create it (step 2).
+**`database is locked`.** Another program (a DB browser, a second `php artisan serve`) has the file open. Close it and try again.
 
 **Page shows unstyled HTML or `Vite manifest not found`.** Run `npm install` then `npm run build` (or `npm run dev`).
 

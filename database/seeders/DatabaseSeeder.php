@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
 
         // Fictional demo data is for local development only, never production.
         if (! app()->isProduction()) {
-            $this->call(DemoSeeder::class);
+            $this->call([DemoSeeder::class, ListingPhotoSeeder::class]);
         }
     }
 }

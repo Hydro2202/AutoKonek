@@ -1,8 +1,8 @@
 <?php
 
+use App\Support\SqliteCheck;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -36,9 +36,14 @@ return new class extends Migration
             $table->index('city_id');
         });
 
-        DB::statement("ALTER TABLE establishments ADD CONSTRAINT establishments_status_check CHECK (status IN ('pending', 'approved', 'rejected'))");
+        SqliteCheck::add('establishments', 'establishments_status_check', "NEW.status IN ('pending', 'approved', 'rejected')", 'A listing status must be pending, approved or rejected.');
         // Latitude and longitude are saved together, and must be real coordinates.
-        DB::statement('ALTER TABLE establishments ADD CONSTRAINT establishments_coordinates_check CHECK ((latitude IS NULL AND longitude IS NULL) OR (latitude IS NOT NULL AND longitude IS NOT NULL AND latitude BETWEEN -90 AND 90 AND longitude BETWEEN -180 AND 180))');
+        SqliteCheck::add(
+            'establishments',
+            'establishments_coordinates_check',
+            '(NEW.latitude IS NULL AND NEW.longitude IS NULL) OR (NEW.latitude IS NOT NULL AND NEW.longitude IS NOT NULL AND NEW.latitude BETWEEN -90 AND 90 AND NEW.longitude BETWEEN -180 AND 180)',
+            'Latitude and longitude must be saved together and be real coordinates.',
+        );
     }
 
     public function down(): void

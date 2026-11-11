@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class EstablishmentImage extends Model
 {
-    protected $fillable = ['image_path', 'is_primary'];
+    protected $fillable = ['image_path', 'is_primary', 'credit', 'credit_url'];
 
     protected function casts(): array
     {

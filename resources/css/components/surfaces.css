@@ -66,8 +66,21 @@
     overflow: hidden;
 }
 
+/*
+| The listing name link stretches over the whole card (photo included), so a click
+| anywhere opens the listing. Buttons that sit above it use a higher z-index.
+| .ticket-body is not positioned, so the stretched area reaches .ticket itself.
+*/
+.ticket { cursor: pointer; }
+
+.ticket-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
 .ticket-body {
-    position: relative;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -82,12 +95,12 @@
 
     .ticket-body { border-top: 0; border-left: 2px dashed var(--color-line-strong); padding: 1.1rem 1.25rem; }
 
-    /* Notches where the ticket would tear. */
+    /* Notches where the ticket would tear, on the dashed edge right after the photo. */
     .ticket-body::before,
     .ticket-body::after {
         content: '';
         position: absolute;
-        left: -9px;
+        left: calc(14rem - 8px);
         width: 16px;
         height: 16px;
         border-radius: 9999px;

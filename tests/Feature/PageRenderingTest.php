@@ -10,8 +10,10 @@ use App\Models\Service;
 use App\Models\User;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\DemoSeeder;
+use Database\Seeders\ListingPhotoSeeder;
 use Database\Seeders\PhilippineLocationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /** Loads every page for every role with realistic data, to catch template errors. */
@@ -46,6 +48,27 @@ class PageRenderingTest extends TestCase
         ] as $url) {
             $this->actingAs($customer)->get($url)->assertOk();
         }
+    }
+
+    public function test_listing_photos_are_attached_with_their_credit(): void
+    {
+        Storage::fake('public');
+
+        $this->seed(ListingPhotoSeeder::class);
+        $this->seed(ListingPhotoSeeder::class); // running it again adds nothing
+
+        $listing = Establishment::where('osm_ref', 'way/109714465')->firstOrFail();
+        $image = $listing->images()->sole();
+
+        $this->assertTrue($image->is_primary);
+        Storage::disk('public')->assertExists($image->image_path);
+
+        $customer = User::where('email', 'customer1@autokonek.test')->first();
+        $this->actingAs($customer)->get(route('establishments.show', $listing))
+            ->assertOk()
+            ->assertSee($image->url())
+            ->assertSee('Photo of SM City Lucena by Ralff Nestor Nacor, CC BY-SA 4.0, via Wikimedia Commons')
+            ->assertSee('https://commons.wikimedia.org/wiki/File:SM_City_Lucena,_Quezon.jpg', false);
     }
 
     public function test_owner_pages_render(): void

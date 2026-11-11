@@ -1,8 +1,8 @@
 <?php
 
+use App\Support\SqliteCheck;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->index('establishment_id');
         });
 
-        DB::statement('ALTER TABLE reviews ADD CONSTRAINT reviews_rating_check CHECK (rating BETWEEN 1 AND 5)');
+        SqliteCheck::add('reviews', 'reviews_rating_check', 'NEW.rating BETWEEN 1 AND 5', 'A rating must be between 1 and 5.');
     }
 
     public function down(): void
