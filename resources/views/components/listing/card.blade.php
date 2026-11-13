@@ -1,6 +1,6 @@
 {{-- Listing card shaped like a garage job card: photo on the left, perforated edge, details on the right. --}}
 @props(['establishment'])
-<article class="ticket">
+<article {{ $attributes->merge(['class' => 'ticket']) }}>
     <div class="ticket-media">
         <img src="{{ $establishment->imageUrl() }}" alt="" loading="lazy" class="size-full object-cover">
         <span class="sign absolute top-3 left-3 size-9" title="{{ $establishment->category?->name }}">

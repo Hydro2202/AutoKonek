@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Establishment;
+use App\Models\FuelPrice;
+use App\Models\Region;
+use App\Models\User;
 use App\Services\LocationLookup;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /** Public directory: only approved establishments are ever listed. */
@@ -64,7 +68,33 @@ class EstablishmentController extends Controller
             $filters['city'] ?? null,
         );
 
-        return view('site.establishments.index', compact('establishments', 'categories', 'location', 'filters', 'hasPosition'));
+        $welcome = $request->user()?->isCustomer() ? $this->customerWelcome($request->user()) : null;
+
+        return view('site.establishments.index', compact('establishments', 'categories', 'location', 'filters', 'hasPosition', 'welcome'));
+    }
+
+    /**
+     * The animated welcome panel customers see at the top of the directory.
+     *
+     * @return array{greeting: string, today: string, listings: int, regions: int, regionsTotal: int, myReviews: int, fuelSeries: array<string, mixed>}
+     */
+    private function customerWelcome(User $customer): array
+    {
+        $now = now('Asia/Manila');
+
+        return [
+            'greeting' => match (true) {
+                $now->hour < 12 => 'Good morning',
+                $now->hour < 18 => 'Good afternoon',
+                default => 'Good evening',
+            }.', '.Str::before($customer->name, ' '),
+            'today' => $now->format('l, F j, Y'),
+            'listings' => Establishment::approved()->count(),
+            'regions' => Region::whereHas('establishments', fn ($q) => $q->where('establishments.status', Establishment::STATUS_APPROVED))->count(),
+            'regionsTotal' => Region::count(),
+            'myReviews' => $customer->reviews()->count(),
+            'fuelSeries' => FuelPrice::chartSeries(),
+        ];
     }
 
     public function category(Category $category): RedirectResponse

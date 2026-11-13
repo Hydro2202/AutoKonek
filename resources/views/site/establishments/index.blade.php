@@ -28,12 +28,28 @@
 @endphp
 
 @section('content')
-<section class="border-b border-line bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <h1 class="text-5xl">Find services</h1>
-        <p class="mt-1.5 text-muted">Only listings approved by an administrator appear here. <a href="{{ route('places.index') }}" class="font-semibold text-steel underline underline-offset-2">Browse by city and region</a></p>
+@if ($welcome)
+    {{-- Customers: an animated welcome panel with their numbers and this week's pump prices. --}}
+    <div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <h1 class="sr-only">Find services</h1>
+        <x-dash.hero :eyebrow="$welcome['today']" :title="$welcome['greeting']" :fuel-series="$welcome['fuelSeries']" :fuel-href="route('home').'#fuel-title'"
+            :stats="[
+                ['Listings to explore', $welcome['listings'], 0, 'Approved by an administrator'],
+                ['Regions covered', $welcome['regions'], 0, 'of '.$welcome['regionsTotal'].' regions'],
+                ['Your reviews', $welcome['myReviews'], 0, $welcome['myReviews'] ? 'Thank you for helping other drivers' : 'Visited a place? Rate it'],
+            ]">
+            Find a gas station, car wash, repair shop, tire shop, parking or battery service.
+            <a href="{{ route('places.index') }}" class="font-semibold text-white underline underline-offset-2 hover:text-accent">Browse by city and region</a>
+        </x-dash.hero>
     </div>
-</section>
+@else
+    <section class="border-b border-line bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+            <h1 class="text-5xl">Find services</h1>
+            <p class="mt-1.5 text-muted">Only listings approved by an administrator appear here. <a href="{{ route('places.index') }}" class="font-semibold text-steel underline underline-offset-2">Browse by city and region</a></p>
+        </div>
+    </section>
+@endif
 
 <form id="filters" action="{{ route('establishments.index') }}" method="GET" data-autosubmit role="search"
       class="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[17.5rem_minmax(0,1fr)]">
@@ -162,7 +178,11 @@
         @else
             <div class="mt-5 space-y-4">
                 @foreach ($establishments as $establishment)
-                    <x-listing.card :establishment="$establishment" />
+                    @if ($welcome)
+                        <x-listing.card :establishment="$establishment" class="dash-rise" style="--i: {{ $loop->index + 4 }}" />
+                    @else
+                        <x-listing.card :establishment="$establishment" />
+                    @endif
                 @endforeach
             </div>
             <div class="mt-8">{{ $establishments->links() }}</div>

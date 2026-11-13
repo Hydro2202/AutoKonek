@@ -82,6 +82,26 @@ class DirectoryTest extends TestCase
         $this->assertSame(1, $gasCount(['city' => $tayabas->id]));
     }
 
+    public function test_only_customers_get_the_animated_welcome_panel(): void
+    {
+        Establishment::factory()->count(2)->create();
+        $customer = User::factory()->create(['name' => 'Ana Cruz']);
+
+        $this->actingAs($customer)->get(route('establishments.index'))
+            ->assertOk()
+            ->assertSee('Ana', false)
+            ->assertSee('Listings to explore')
+            ->assertSee('Your reviews')
+            ->assertViewHas('welcome', fn ($welcome) => $welcome['listings'] === 2 && $welcome['myReviews'] === 0);
+
+        foreach ([User::factory()->owner()->create(), User::factory()->admin()->create()] as $user) {
+            $this->actingAs($user)->get(route('establishments.index'))
+                ->assertOk()
+                ->assertDontSee('Listings to explore')
+                ->assertViewHas('welcome', null);
+        }
+    }
+
     public function test_empty_results_show_friendly_message(): void
     {
         $this->get(route('establishments.index', ['q' => 'zzzz-nothing']))
