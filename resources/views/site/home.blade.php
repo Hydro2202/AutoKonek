@@ -141,7 +141,8 @@
     </ol>
 </section>
 
-{{-- Owner call to action --}}
+{{-- Owner call to action: only for visitors who have not signed in yet, since it leads to creating an account. --}}
+@guest
 <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
     <div class="grid items-center gap-10 rounded-lg bg-navy p-8 text-white md:grid-cols-2 md:p-12">
         <div>
@@ -161,4 +162,5 @@
         </div>
     </div>
 </section>
+@endguest
 @endsection

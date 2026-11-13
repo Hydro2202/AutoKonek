@@ -26,6 +26,24 @@ class ReviewAndReportTest extends TestCase
         $this->assertDatabaseHas('reviews', ['user_id' => $customer->id, 'establishment_id' => $e->id, 'rating' => 4]);
     }
 
+    public function test_review_actions_return_to_the_reviews_section(): void
+    {
+        $customer = User::factory()->create();
+        $e = Establishment::factory()->create();
+        $page = route('establishments.show', $e);
+
+        $this->actingAs($customer)->from($page)->post(route('reviews.store', $e), ['rating' => 4, 'comment' => 'Great service overall.'])
+            ->assertRedirect($page.'#reviews');
+
+        $review = Review::first();
+        $this->from($page)->put(route('reviews.update', $review), ['rating' => 5, 'comment' => 'Even better now.'])
+            ->assertRedirect($page.'#reviews');
+        $this->from($page)->put(route('reviews.update', $review), ['rating' => 9, 'comment' => 'x'])
+            ->assertRedirect($page.'#review-form');
+        $this->from($page)->delete(route('reviews.destroy', $review))
+            ->assertRedirect($page.'#reviews');
+    }
+
     public function test_rating_must_be_between_1_and_5(): void
     {
         $customer = User::factory()->create();

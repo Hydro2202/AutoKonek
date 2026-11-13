@@ -28,6 +28,10 @@
 
         <div class="hidden items-center gap-2 md:flex">
             @auth
+                {{-- Business owners browsing the public site get a one-click way back to their dashboard. --}}
+                @if ($user->isOwner())
+                    <a href="{{ route('owner.dashboard') }}" class="btn-primary btn-sm"><x-ui.icon name="dashboard" class="size-4" /> Back to dashboard</a>
+                @endif
                 <details class="relative">
                     <summary class="flex cursor-pointer list-none items-center gap-2 rounded-sign py-1 pr-2 pl-1 text-sm font-medium hover:bg-white/10">
                         <span class="flex size-8 items-center justify-center rounded-sign bg-accent font-display text-lg font-bold text-navy-950">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
@@ -59,6 +63,9 @@
 
     <div id="mobile-menu" class="hidden border-t border-white/10 px-4 pt-3 pb-4 md:hidden">
         <div class="flex flex-col">
+            @if ($user?->isOwner())
+                <a href="{{ route('owner.dashboard') }}" class="btn-primary mb-2 justify-center"><x-ui.icon name="dashboard" class="size-4" /> Back to dashboard</a>
+            @endif
             @foreach ($links as [$route, $label])
                 <a href="{{ route($route) }}" class="rounded-sign px-3 py-3 text-base font-medium text-white/90 hover:bg-white/10">{{ $label }}</a>
             @endforeach

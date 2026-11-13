@@ -171,34 +171,52 @@
                 </div>
 
                 @if ($canReview)
-                    <form method="POST" action="{{ $myReview ? route('reviews.update', $myReview) : route('reviews.store', $establishment) }}"
-                          class="mt-5 space-y-4 rounded-lg border border-line bg-white p-5">
+                    @php $ratingWords = [1 => 'Poor', 2 => 'Fair', 3 => 'Okay', 4 => 'Good', 5 => 'Great']; @endphp
+                    <form id="review-form" method="POST" action="{{ $myReview ? route('reviews.update', $myReview) : route('reviews.store', $establishment) }}"
+                          class="mt-5 scroll-mt-24 space-y-4 rounded-lg border border-line bg-white p-5">
                         @csrf
                         @if ($myReview) @method('PUT') @endif
                         <h3 class="text-2xl">{{ $myReview ? 'Edit your review' : 'Write a review' }}</h3>
 
-                        <fieldset>
+                        {{-- Star picker: the same stars used to show ratings everywhere else (see .star-picker in forms.css). --}}
+                        <fieldset class="star-picker">
                             <legend class="label">Your rating <span class="text-danger-700" aria-hidden="true">*</span></legend>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ([1 => 'Poor', 2 => 'Fair', 3 => 'Okay', 4 => 'Good', 5 => 'Great'] as $value => $text)
-                                    <label class="flex min-w-16 cursor-pointer flex-col items-center rounded-sign border border-line-strong px-3 py-2 text-center hover:border-navy has-[:checked]:border-navy has-[:checked]:bg-navy has-[:checked]:text-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-steel">
-                                        <input type="radio" name="rating" value="{{ $value }}" class="sr-only" required @checked((int) old('rating', $myReview?->rating) === $value)>
-                                        <span class="font-display text-2xl leading-none font-semibold">{{ $value }}</span>
-                                        <span class="text-xs">{{ $text }}</span>
-                                    </label>
-                                @endforeach
+                            <div class="flex flex-wrap items-center gap-3">
+                                <div class="star-picker-stars">
+                                    @foreach ($ratingWords as $value => $text)
+                                        <label class="star-picker-star" title="{{ $value }} – {{ $text }}">
+                                            <input type="radio" name="rating" value="{{ $value }}" class="sr-only" required @checked((int) old('rating', $myReview?->rating) === $value)>
+                                            <x-ui.icon name="star" class="size-8" />
+                                            <span class="sr-only">{{ $value }} {{ Str::plural('star', $value) }}, {{ $text }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <span class="star-picker-caption" aria-hidden="true">
+                                    <span data-caption="0">Tap a star</span>
+                                    @foreach ($ratingWords as $value => $text)
+                                        <span data-caption="{{ $value }}">{{ $value }} of 5 · {{ $text }}</span>
+                                    @endforeach
+                                </span>
                             </div>
                             @error('rating') <p class="error-text">{{ $message }}</p> @enderror
                         </fieldset>
 
                         <x-form.textarea name="comment" label="What was it like?" :value="$myReview?->comment" required rows="3" hint="At least 5 characters. Be specific and fair." />
-                        <button type="submit" class="btn-primary">{{ $myReview ? 'Save changes' : 'Post review' }}</button>
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
+                            <button type="submit" class="btn-primary">{{ $myReview ? 'Save changes' : 'Post review' }}</button>
+                            @if ($myReview)
+                                <button type="submit" form="delete-review" class="btn-danger-outline btn-sm">
+                                    <x-ui.icon name="trash" class="size-3.5" /> Delete review
+                                </button>
+                            @endif
+                        </div>
                     </form>
 
                     @if ($myReview)
-                        <form method="POST" action="{{ route('reviews.destroy', $myReview) }}" data-confirm="Delete your review? This cannot be undone." class="mt-2">
+                        {{-- Kept outside the review form (forms cannot nest); the Delete button above submits it. --}}
+                        <form id="delete-review" method="POST" action="{{ route('reviews.destroy', $myReview) }}" data-confirm="Delete your review? This cannot be undone." class="hidden">
                             @csrf @method('DELETE')
-                            <button type="submit" class="text-sm font-semibold text-danger-700 hover:underline">Delete my review</button>
                         </form>
                     @endif
                 @elseif (! $user)

@@ -42,7 +42,8 @@
                    class="btn-outline btn-sm" title="Show the route from where you are" aria-label="Directions to {{ $establishment->name }}">
                     <x-ui.icon name="navigation" class="size-3.5" /> Directions
                 </a>
-                <span class="btn-navy btn-sm pointer-events-none">Details <x-ui.icon name="arrow-right" class="size-3.5" /></span>
+                <a href="{{ route('establishments.show', $establishment) }}" data-transition data-rt-label="{{ $establishment->name }}"
+                   class="btn-navy btn-sm" tabindex="-1" aria-hidden="true">Details <x-ui.icon name="arrow-right" class="size-3.5" /></a>
             </div>
         </div>
     </div>

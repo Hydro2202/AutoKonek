@@ -102,6 +102,26 @@ class DirectoryTest extends TestCase
         }
     }
 
+    public function test_only_business_owners_see_back_to_dashboard_on_the_public_site(): void
+    {
+        $this->actingAs(User::factory()->owner()->create())->get(route('establishments.index'))
+            ->assertOk()->assertSee('Back to dashboard')->assertSee(route('owner.dashboard'));
+
+        foreach ([User::factory()->create(), User::factory()->admin()->create()] as $user) {
+            $this->actingAs($user)->get(route('establishments.index'))->assertDontSee('Back to dashboard');
+        }
+    }
+
+    public function test_list_your_business_banner_is_only_shown_to_guests(): void
+    {
+        foreach ([User::factory()->create(), User::factory()->owner()->create(), User::factory()->admin()->create()] as $user) {
+            $this->actingAs($user)->get(route('home'))->assertOk()->assertDontSee('Own a shop, station or lot?');
+        }
+
+        auth()->logout();
+        $this->get(route('home'))->assertOk()->assertSee('Own a shop, station or lot?');
+    }
+
     public function test_empty_results_show_friendly_message(): void
     {
         $this->get(route('establishments.index', ['q' => 'zzzz-nothing']))

@@ -2,7 +2,8 @@
 | Motion is used only where it explains something:
 |  - the service board flips its counts once when the homepage loads,
 |  - toasts, the cookie banner and dialogs enter from where they belong,
-|  - buttons show a road-line while a form is sending.
+|  - buttons show a road-line while a form is sending,
+|  - the logo's car takes a short drive when the logo is hovered or focused.
 | Nothing animates on scroll, and everything is off for visitors who prefer reduced motion.
 */
 @keyframes flap {
@@ -61,4 +62,67 @@ dialog::backdrop { background: rgb(10 24 40 / 0.55); }
         transition-duration: 0.001ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/*
+| Logo: on hover (or keyboard focus of its link) the car hops like it is revving,
+| drives out of the badge to the right, comes back in from the left and settles with a small bounce.
+| Road dashes stream underneath while it drives.
+*/
+.brand-badge { position: relative; overflow: hidden; }
+.brand-car { position: relative; z-index: 1; }
+.brand-road {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 5px;
+    height: 2px;
+    opacity: 0;
+    background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 10px);
+}
+
+@keyframes brand-drive {
+    0% { transform: translate(0, 0) rotate(0); }
+    8% { transform: translate(-2px, -3px) rotate(-8deg); }
+    16% { transform: translate(-1px, 0) rotate(0); }
+    22% { transform: translate(-2px, -1.5px) rotate(-4deg); }
+    28% { transform: translate(0, 0) rotate(0); }
+    55% { transform: translate(170%, 0) rotate(0); }
+    55.1% { transform: translate(-170%, 0) rotate(0); }
+    80% { transform: translate(6%, 0) rotate(3deg); }
+    88% { transform: translate(-3%, -1px) rotate(-2deg); }
+    100% { transform: translate(0, 0) rotate(0); }
+}
+
+@keyframes brand-road {
+    0%, 25% { opacity: 0; background-position: 0 0; }
+    35%, 75% { opacity: 0.35; }
+    100% { opacity: 0; background-position: -60px 0; }
+}
+
+@keyframes brand-badge-bump {
+    0%, 100% { transform: scale(1); }
+    85% { transform: scale(1.06); }
+}
+
+@keyframes brand-konek {
+    0%, 60%, 100% { transform: translateX(0); }
+    75% { transform: translateX(3px); }
+    88% { transform: translateX(-1px); }
+}
+
+:is(a:hover, a:focus-visible) > .brand-logo .brand-car,
+.brand-logo:hover .brand-car { animation: brand-drive 1.1s cubic-bezier(0.45, 0, 0.3, 1); }
+:is(a:hover, a:focus-visible) > .brand-logo .brand-road,
+.brand-logo:hover .brand-road { animation: brand-road 1.1s linear; }
+:is(a:hover, a:focus-visible) > .brand-logo .brand-badge,
+.brand-logo:hover .brand-badge { animation: brand-badge-bump 1.1s ease-out; }
+:is(a:hover, a:focus-visible) > .brand-logo .brand-konek,
+.brand-logo:hover .brand-konek { animation: brand-konek 1.1s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-logo .brand-car,
+    .brand-logo .brand-road,
+    .brand-logo .brand-badge,
+    .brand-logo .brand-konek { animation: none !important; }
 }

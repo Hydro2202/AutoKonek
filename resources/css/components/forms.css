@@ -20,3 +20,42 @@ input[type='radio'] {
     @apply block w-full cursor-pointer rounded-sign border border-dashed border-line-strong bg-white p-3 text-sm text-muted transition-colors hover:border-navy;
     @apply file:mr-3 file:cursor-pointer file:rounded-sign file:border-0 file:bg-navy file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-white hover:file:bg-navy-700;
 }
+
+/*
+| Star rating picker on the review form. Stars light up to the chosen one, and preview on hover.
+| Low-specificity :where() rules hold the chosen state so the hover preview can override it.
+*/
+.star-picker-stars { display: inline-flex; }
+.star-picker-star {
+    cursor: pointer;
+    padding: 0.125rem;
+    border-radius: 0.375rem;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+:where(.star-picker-star) { color: var(--color-line-strong); }
+.star-picker-star:hover { transform: scale(1.12); }
+.star-picker-star:has(:focus-visible) { outline: 2px solid var(--color-steel); outline-offset: 2px; }
+
+:where(.star-picker-stars:has(input[value="1"]:checked) > :nth-child(-n + 1)),
+:where(.star-picker-stars:has(input[value="2"]:checked) > :nth-child(-n + 2)),
+:where(.star-picker-stars:has(input[value="3"]:checked) > :nth-child(-n + 3)),
+:where(.star-picker-stars:has(input[value="4"]:checked) > :nth-child(-n + 4)),
+:where(.star-picker-stars:has(input[value="5"]:checked) > :nth-child(-n + 5)) { color: var(--color-accent); }
+
+.star-picker-stars:hover > .star-picker-star { color: var(--color-line-strong); }
+.star-picker-stars:hover > .star-picker-star:hover,
+.star-picker-stars:hover > .star-picker-star:has(~ .star-picker-star:hover) { color: var(--color-accent); }
+
+.star-picker-caption { font-size: 0.875rem; font-weight: 600; color: var(--color-navy); }
+.star-picker-caption > span { display: none; }
+.star-picker:not(:has(input:checked)) [data-caption="0"] { display: inline; font-weight: 400; color: var(--color-muted); }
+.star-picker:has(input[value="1"]:checked) [data-caption="1"],
+.star-picker:has(input[value="2"]:checked) [data-caption="2"],
+.star-picker:has(input[value="3"]:checked) [data-caption="3"],
+.star-picker:has(input[value="4"]:checked) [data-caption="4"],
+.star-picker:has(input[value="5"]:checked) [data-caption="5"] { display: inline; }
+
+@media (prefers-reduced-motion: reduce) {
+    .star-picker-star { transition: none; }
+    .star-picker-star:hover { transform: none; }
+}

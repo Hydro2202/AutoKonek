@@ -18,7 +18,7 @@ class ReviewController extends Controller
         abort_unless($establishment->isApproved(), 404);
 
         if ($establishment->reviews()->where('user_id', $request->user()->id)->exists()) {
-            return back()->with('error', 'You have already reviewed this establishment. You can edit your existing review instead.');
+            return back()->withFragment('review-form')->with('error', 'You have already reviewed this establishment. You can edit your existing review instead.');
         }
 
         $review = new Review($request->validated());
@@ -26,7 +26,8 @@ class ReviewController extends Controller
         $review->establishment_id = $establishment->id;
         $review->save();
 
-        return redirect()->route('establishments.show', $establishment)->with('success', 'Thanks! Your review has been posted.');
+        // Land back on the reviews section, not the top of the page.
+        return redirect()->route('establishments.show', $establishment)->withFragment('reviews')->with('success', 'Thanks! Your review has been posted.');
     }
 
     public function update(ReviewRequest $request, Review $review): RedirectResponse
@@ -35,7 +36,7 @@ class ReviewController extends Controller
 
         $review->update($request->validated());
 
-        return redirect()->route('establishments.show', $review->establishment)->with('success', 'Your review has been updated.');
+        return redirect()->route('establishments.show', $review->establishment)->withFragment('reviews')->with('success', 'Your review has been updated.');
     }
 
     public function destroy(Review $review): RedirectResponse
@@ -44,6 +45,6 @@ class ReviewController extends Controller
 
         $review->delete();
 
-        return back()->with('success', 'Your review has been deleted.');
+        return back()->withFragment('reviews')->with('success', 'Your review has been deleted.');
     }
 }

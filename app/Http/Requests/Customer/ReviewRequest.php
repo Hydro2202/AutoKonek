@@ -13,4 +13,10 @@ class ReviewRequest extends FormRequest
             'comment' => ['required', 'string', 'min:5', 'max:2000'],
         ];
     }
+
+    /** On a validation error, return to the review form rather than the top of the page. */
+    protected function getRedirectUrl(): string
+    {
+        return parent::getRedirectUrl().'#review-form';
+    }
 }
