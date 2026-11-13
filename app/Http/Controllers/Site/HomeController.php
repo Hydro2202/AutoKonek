@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\City;
 use App\Models\Establishment;
+use App\Models\FuelPrice;
 use App\Models\Review;
 use Illuminate\View\View;
 
@@ -39,6 +40,8 @@ class HomeController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('site.home', compact('categories', 'recent', 'totals', 'places'));
+        $fuelSeries = FuelPrice::chartSeries();
+
+        return view('site.home', compact('categories', 'recent', 'totals', 'places', 'fuelSeries'));
     }
 }

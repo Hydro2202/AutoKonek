@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Hash;
 class DemoSeeder extends Seeder
 {
     /** What each category's real places are called in the generated description. */
-    private const NOUNS = [
+    public const NOUNS = [
         'gas-stations' => 'Gas station',
         'car-wash' => 'Car wash',
         'auto-repair' => 'Auto repair shop',
@@ -87,6 +87,7 @@ class DemoSeeder extends Seeder
         };
 
         // 1) Real places from OpenStreetMap. Gas, car wash and parking go to the first owner, the rest to the second.
+        //    (Places in the other regions are added by NationwidePlacesSeeder.)
         $places = json_decode(file_get_contents(database_path('data/quezon-places.json')), true, 512, JSON_THROW_ON_ERROR)['places'];
 
         foreach ($places as $place) {

@@ -66,6 +66,11 @@
     </aside>
 </section>
 
+{{-- Weekly fuel prices (DOE adjustments), shown to everyone. --}}
+<div class="mx-auto max-w-7xl px-4 pb-14 sm:px-6">
+    <x-fuel.tracker :series="$fuelSeries" />
+</div>
+
 @auth
 {{-- Local: places around Lucena City and Quezon province --}}
 @if ($places->isNotEmpty())

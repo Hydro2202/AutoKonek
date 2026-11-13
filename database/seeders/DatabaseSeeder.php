@@ -12,11 +12,12 @@ class DatabaseSeeder extends Seeder
             PhilippineLocationSeeder::class,
             CategorySeeder::class,
             AdminSeeder::class,
+            FuelPriceSeeder::class,
         ]);
 
         // Fictional demo data is for local development only, never production.
         if (! app()->isProduction()) {
-            $this->call([DemoSeeder::class, ListingPhotoSeeder::class]);
+            $this->call([DemoSeeder::class, NationwidePlacesSeeder::class, ListingPhotoSeeder::class]);
         }
     }
 }

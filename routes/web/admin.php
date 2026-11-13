@@ -26,4 +26,8 @@ Route::middleware(['auth', 'active', 'role:admin'])->prefix('admin')->name('admi
     Route::patch('/reports/{report}', [Admin\ReportController::class, 'update'])->name('reports.update');
 
     Route::get('/messages', [Admin\MessageController::class, 'index'])->name('messages.index');
+
+    Route::get('/fuel-prices', [Admin\FuelPriceController::class, 'index'])->name('fuel-prices.index');
+    Route::post('/fuel-prices', [Admin\FuelPriceController::class, 'store'])->name('fuel-prices.store');
+    Route::delete('/fuel-prices/latest', [Admin\FuelPriceController::class, 'destroyLatest'])->name('fuel-prices.destroy-latest');
 });

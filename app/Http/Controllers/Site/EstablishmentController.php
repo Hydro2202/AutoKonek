@@ -50,8 +50,11 @@ class EstablishmentController extends Controller
 
         $establishments = $query->paginate(config('autokonek.pagination.directory'))->withQueryString();
 
+        // Counts follow the chosen place and name search, so they match what each category link will show.
         $categories = Category::active()
-            ->withCount(['establishments' => fn ($q) => $q->approved()])
+            ->withCount(['establishments' => fn ($q) => $q->approved()
+                ->search($filters['q'] ?? null)
+                ->inPlace($filters['region'] ?? null, $filters['province'] ?? null, $filters['city'] ?? null)])
             ->orderBy('id')
             ->get();
 

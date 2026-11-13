@@ -1,0 +1,23 @@
+{
+    "about": "Metro Manila pump prices per liter, week by week. Starting point: the DOE common (most frequent) Metro Manila price for the week of 25-31 August 2026. Every other week is that price plus or minus the DOE weekly adjustments below. Actual prices differ per station, brand and province.",
+    "anchor": {
+        "effective_on": "2026-08-25",
+        "prices": { "gasoline": 75.90, "diesel": 89.40, "kerosene": 118.10 },
+        "source": "DOE Metro Manila common price, 25-31 Aug 2026, as reported by Rappler"
+    },
+    "adjustments": [
+        { "effective_on": "2026-08-18", "gasoline": 2.49, "diesel": 3.84, "kerosene": 5.01, "source": "DOE advisory, as reported by Rappler" },
+        { "effective_on": "2026-08-25", "gasoline": 1.08, "diesel": 2.31, "kerosene": 0.95, "source": "DOE advisory, as reported by Rappler" },
+        { "effective_on": "2026-09-01", "gasoline": -0.32, "diesel": -3.83, "kerosene": -3.84, "source": "DOE advisory, as reported by Rappler" },
+        { "effective_on": "2026-09-08", "gasoline": 4.69, "diesel": 5.18, "kerosene": 5.58, "source": "DOE advisory, as reported by Rappler" },
+        { "effective_on": "2026-09-15", "gasoline": 5.68, "diesel": 4.31, "kerosene": 4.62, "source": "DOE advisory, as reported by Rappler and Top Gear PH" },
+        { "effective_on": "2026-09-22", "gasoline": 4.88, "diesel": 8.82, "kerosene": 6.47, "source": "DOE advisory, as reported by Rappler" },
+        { "effective_on": "2026-09-29", "gasoline": -0.24, "diesel": -7.57, "kerosene": -5.85, "source": "DOE advisory, as reported by Rappler and Top Gear PH" },
+        { "effective_on": "2026-10-06", "gasoline": 1.93, "diesel": -1.30, "kerosene": 3.30, "source": "Oil company advisory, as reported by Philstar" },
+        { "effective_on": "2026-10-13", "gasoline": 1.56, "diesel": -3.01, "kerosene": 1.77, "source": "DOE advisory, as reported by Daily Tribune" },
+        { "effective_on": "2026-10-20", "gasoline": -4.30, "diesel": 2.60, "kerosene": -1.00, "source": "DOE advisory, as reported by PhilNews and Rappler" },
+        { "effective_on": "2026-10-27", "gasoline": -0.30, "diesel": 1.20, "kerosene": -0.50, "source": "DOE advisory, as reported by Rappler" },
+        { "effective_on": "2026-11-03", "gasoline": 3.50, "diesel": -1.00, "kerosene": -1.90, "source": "DOE advisory, as reported by GMA News and SunStar" },
+        { "effective_on": "2026-11-10", "gasoline": -16.80, "diesel": -4.10, "kerosene": -3.70, "source": "DOE advisory (doe.gov.ph)" }
+    ]
+}

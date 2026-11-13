@@ -67,6 +67,21 @@ class DirectoryTest extends TestCase
         $this->get(route('categories.show', $gas))->assertRedirect(route('establishments.index', ['category' => 'gas-stations']));
     }
 
+    public function test_category_counts_follow_the_chosen_place(): void
+    {
+        $gas = Category::factory()->create(['name' => 'Gas Stations', 'slug' => 'gas-stations']);
+        $lucena = City::factory()->create(['name' => 'Lucena City']);
+        $tayabas = City::factory()->create(['name' => 'Tayabas City']);
+        Establishment::factory()->count(2)->create(['category_id' => $gas->id, 'city_id' => $lucena->id]);
+        Establishment::factory()->create(['category_id' => $gas->id, 'city_id' => $tayabas->id]);
+
+        $gasCount = fn (array $query) => $this->get(route('establishments.index', $query))
+            ->viewData('categories')->firstWhere('id', $gas->id)->establishments_count;
+
+        $this->assertSame(3, $gasCount([]));
+        $this->assertSame(1, $gasCount(['city' => $tayabas->id]));
+    }
+
     public function test_empty_results_show_friendly_message(): void
     {
         $this->get(route('establishments.index', ['q' => 'zzzz-nothing']))

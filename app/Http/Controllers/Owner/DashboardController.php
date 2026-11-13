@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Establishment;
+use App\Models\FuelPrice;
 use App\Models\Review;
 
 class DashboardController extends Controller
@@ -29,6 +30,8 @@ class DashboardController extends Controller
         $latestReviews = Review::whereIn('establishment_id', $user->establishments()->select('id'))
             ->with(['user', 'establishment'])->latest()->take(5)->get();
 
-        return view('owner.dashboard', compact('stats', 'establishments', 'rejected', 'latestReviews'));
+        $fuelSeries = FuelPrice::chartSeries();
+
+        return view('owner.dashboard', compact('stats', 'establishments', 'rejected', 'latestReviews', 'fuelSeries'));
     }
 }

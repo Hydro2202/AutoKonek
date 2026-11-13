@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Establishment;
+use App\Models\FuelPrice;
+use App\Models\Region;
 use App\Models\Report;
 use App\Models\Review;
 use App\Models\User;
@@ -42,7 +44,22 @@ class DashboardController extends Controller
 
         $activity = $this->activity();
 
-        return view('admin.dashboard', compact('stats', 'newThisWeek', 'pending', 'recentReports', 'recentReviews', 'activity'));
+        // Approved listings per region, busiest first, for the coverage card.
+        $regions = Region::withCount(['establishments' => fn ($q) => $q->where('establishments.status', Establishment::STATUS_APPROVED)])
+            ->orderByDesc('establishments_count')
+            ->orderBy('id')
+            ->get();
+
+        $headline = [
+            'live' => Establishment::approved()->count(),
+            'regions' => $regions->where('establishments_count', '>', 0)->count(),
+            'regionsTotal' => $regions->count(),
+            'rating' => round((float) Review::avg('rating'), 1),
+        ];
+
+        $fuelSeries = FuelPrice::chartSeries();
+
+        return view('admin.dashboard', compact('stats', 'newThisWeek', 'pending', 'recentReports', 'recentReviews', 'activity', 'regions', 'headline', 'fuelSeries'));
     }
 
     /**

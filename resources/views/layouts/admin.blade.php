@@ -15,6 +15,7 @@
         'Catalog' => [
             ['admin.establishments.index', 'Establishments', 'building', 'admin.establishments.*', null],
             ['admin.categories.index', 'Categories', 'tag', 'admin.categories.*', null],
+            ['admin.fuel-prices.index', 'Fuel prices', 'fuel', 'admin.fuel-prices.*', null],
         ],
         'People and inbox' => [
             ['admin.users.index', 'Users', 'users', 'admin.users.*', null],

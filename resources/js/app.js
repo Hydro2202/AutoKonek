@@ -9,6 +9,8 @@ import { initRouteTransition } from './modules/route-transition';
 import { initLocationPicker } from './modules/location-picker';
 import { initGeolocation } from './modules/geolocation';
 import { initRouteMap } from './modules/route-map';
+import { initFuelTracker } from './modules/fuel-tracker';
+import { initDashboardMotion } from './modules/dashboard-motion';
 
 document.addEventListener('DOMContentLoaded', () => {
     initRouteTransition();
@@ -22,4 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initLocationPicker();
     initGeolocation();
     initRouteMap();
+    initFuelTracker();
+    initDashboardMotion();
 });

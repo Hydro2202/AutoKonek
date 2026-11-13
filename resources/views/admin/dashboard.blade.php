@@ -17,13 +17,23 @@
 @endphp
 
 @section('content')
-<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-    <x-panel.kpi label="Total users" :value="$stats['users']" :note="'+'.$newThisWeek['users'].' in the last 7 days'" icon="users" :href="route('admin.users.index')" />
-    <x-panel.kpi label="Business owners" :value="$stats['owners']" :note="$ownerShare.'% of all users'" icon="building" :href="route('admin.users.index', ['role' => 'business_owner'])" />
-    <x-panel.kpi label="Establishments" :value="$stats['establishments']" :note="'+'.$newThisWeek['establishments'].' in the last 7 days'" icon="tag" :href="route('admin.establishments.index')" />
-    <x-panel.kpi label="Pending approvals" :value="$stats['pending']" :note="$stats['pending'] ? 'Waiting for a decision' : 'All caught up'" icon="circle-check" :href="route('admin.approvals')" :alert="$stats['pending'] > 0" />
-    <x-panel.kpi label="Reviews" :value="$stats['reviews']" :note="'+'.$newThisWeek['reviews'].' in the last 7 days'" icon="star" :href="route('admin.reviews.index')" />
-    <x-panel.kpi label="Unresolved reports" :value="$stats['reports']" :note="$stats['reports'] ? 'Needs moderation' : 'Nothing open'" icon="flag" :href="route('admin.reports.index', ['status' => 'pending'])" :alert="$stats['reports'] > 0" />
+<x-dash.hero eyebrow="Live platform overview" :title="'Welcome back, '.auth()->user()->name"
+    :fuel-series="$fuelSeries" :fuel-href="route('admin.fuel-prices.index')"
+    :stats="[
+        ['Listings live', $headline['live'], 0, 'Approved and visible'],
+        ['Regions covered', $headline['regions'], 0, 'of '.$headline['regionsTotal'].' regions'],
+        ['Average rating', $headline['rating'], 1, 'Across all reviews'],
+    ]">
+    {{ now()->format('l, F j, Y') }}. Every figure on this page is counted from the database.
+</x-dash.hero>
+
+<div class="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <x-panel.kpi style="--i: 4" label="Total users" :value="$stats['users']" :note="'+'.$newThisWeek['users'].' in the last 7 days'" icon="users" :href="route('admin.users.index')" />
+    <x-panel.kpi style="--i: 5" label="Business owners" :value="$stats['owners']" :note="$ownerShare.'% of all users'" icon="building" :href="route('admin.users.index', ['role' => 'business_owner'])" />
+    <x-panel.kpi style="--i: 6" label="Establishments" :value="$stats['establishments']" :note="'+'.$newThisWeek['establishments'].' in the last 7 days'" icon="tag" :href="route('admin.establishments.index')" />
+    <x-panel.kpi style="--i: 7" label="Pending approvals" :value="$stats['pending']" :note="$stats['pending'] ? 'Waiting for a decision' : 'All caught up'" icon="circle-check" :href="route('admin.approvals')" :alert="$stats['pending'] > 0" />
+    <x-panel.kpi style="--i: 8" label="Reviews" :value="$stats['reviews']" :note="'+'.$newThisWeek['reviews'].' in the last 7 days'" icon="star" :href="route('admin.reviews.index')" />
+    <x-panel.kpi style="--i: 9" label="Unresolved reports" :value="$stats['reports']" :note="$stats['reports'] ? 'Needs moderation' : 'Nothing open'" icon="flag" :href="route('admin.reports.index', ['status' => 'pending'])" :alert="$stats['reports'] > 0" />
 </div>
 
 <div class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -36,7 +46,7 @@
                 </div>
             </x-slot:actions>
 
-            <svg viewBox="0 0 {{ $chartWidth }} {{ $chartHeight + 24 }}" class="h-auto w-full" role="img"
+            <svg viewBox="0 0 {{ $chartWidth }} {{ $chartHeight + 24 }}" class="dash-bars h-auto w-full" role="img"
                  aria-label="Bar chart of new users and new reviews per day for the last 14 days. {{ $usersTotal }} new users and {{ $reviewsTotal }} new reviews in total.">
                 @foreach ([0, 0.5, 1] as $line)
                     <line x1="0" x2="{{ $chartWidth }}" y1="{{ $chartHeight - $line * $chartHeight + 0.5 }}" y2="{{ $chartHeight - $line * $chartHeight + 0.5 }}" stroke="var(--color-line)" />
@@ -49,10 +59,12 @@
                         $usersHeight = $day['users'] / $max * ($chartHeight - 14);
                         $reviewsHeight = $day['reviews'] / $max * ($chartHeight - 14);
                     @endphp
-                    <g>
+                    <g class="dash-day">
                         <title>{{ $day['date']->format('M j') }}: {{ $day['users'] }} new {{ Str::plural('user', $day['users']) }}, {{ $day['reviews'] }} new {{ Str::plural('review', $day['reviews']) }}</title>
-                        <rect x="{{ $x }}" y="{{ $chartHeight - $usersHeight }}" width="{{ $barWidth }}" height="{{ max($usersHeight, $day['users'] ? 2 : 0) }}" rx="2" fill="var(--color-steel)" />
-                        <rect x="{{ $x + $barWidth + 2 }}" y="{{ $chartHeight - $reviewsHeight }}" width="{{ $barWidth }}" height="{{ max($reviewsHeight, $day['reviews'] ? 2 : 0) }}" rx="2" fill="var(--color-accent)" />
+                        {{-- A transparent column makes the whole day hoverable, not just the thin bars. --}}
+                        <rect x="{{ $x - 4 }}" y="0" width="{{ $slot }}" height="{{ $chartHeight }}" fill="transparent" />
+                        <rect x="{{ $x }}" y="{{ $chartHeight - $usersHeight }}" width="{{ $barWidth }}" height="{{ max($usersHeight, $day['users'] ? 2 : 0) }}" rx="2" fill="var(--color-steel)" class="dash-bar" style="--i: {{ $i }}" />
+                        <rect x="{{ $x + $barWidth + 2 }}" y="{{ $chartHeight - $reviewsHeight }}" width="{{ $barWidth }}" height="{{ max($reviewsHeight, $day['reviews'] ? 2 : 0) }}" rx="2" fill="var(--color-accent)" class="dash-bar" style="--i: {{ $i }}" />
                     </g>
                     @if ($i % 2 === 0 || $loop->last)
                         <text x="{{ $x + $barWidth }}" y="{{ $chartHeight + 16 }}" font-size="11" text-anchor="middle" fill="var(--color-muted)">{{ $day['date']->format('M j') }}</text>
@@ -86,6 +98,25 @@
     </div>
 
     <div class="space-y-6">
+        @php $regionMax = max(1, $regions->max('establishments_count')); @endphp
+        <x-panel.card title="Coverage by region" :subtitle="$headline['regions'].' of '.$headline['regionsTotal'].' regions have live listings'" class="dash-rise" style="--i: 6">
+            <ul class="space-y-2.5">
+                @foreach ($regions as $region)
+                    <li>
+                        <a href="{{ route('establishments.index', ['region' => $region->id]) }}" class="group block" title="{{ $region->label() }}">
+                            <span class="flex items-baseline justify-between gap-3 text-[0.8125rem]">
+                                <span class="truncate font-medium text-ink group-hover:text-steel">{{ $region->name }}</span>
+                                <span class="font-semibold text-navy tabular-nums">{{ $region->establishments_count }}</span>
+                            </span>
+                            <span class="dash-meter mt-1 block" aria-hidden="true">
+                                <span style="width: {{ round($region->establishments_count / $regionMax * 100, 1) }}%; --i: {{ $loop->index }}"></span>
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </x-panel.card>
+
         <x-panel.card title="Recent reports" :flush="true">
             <x-slot:actions><a href="{{ route('admin.reports.index') }}" class="text-sm font-medium text-steel hover:text-navy">View all</a></x-slot:actions>
             @forelse ($recentReports as $report)

@@ -6,6 +6,7 @@ use Database\Factories\RegionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Region extends Model
 {
@@ -24,6 +25,11 @@ class Region extends Model
     public function cities(): HasMany
     {
         return $this->hasMany(City::class);
+    }
+
+    public function establishments(): HasManyThrough
+    {
+        return $this->hasManyThrough(Establishment::class, City::class);
     }
 
     /** For example "Region IV-A (CALABARZON)" or "National Capital Region (NCR)". */

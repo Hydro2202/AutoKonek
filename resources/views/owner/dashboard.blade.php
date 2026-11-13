@@ -4,25 +4,16 @@
 @section('heading', 'Hello, '.Str::before(auth()->user()->name, ' '))
 @section('subheading', 'Here is how your listings are doing.')
 @section('content')
-{{-- Stat strip: one bordered block, divided into cells --}}
-<dl class="grid grid-cols-2 divide-x divide-y divide-line overflow-hidden rounded-lg border border-line bg-white lg:grid-cols-4 lg:divide-y-0">
-    @foreach ([
-        ['Live', $stats['approved'], 'Visible to drivers'],
-        ['In review', $stats['pending'], 'Waiting for an administrator'],
-        ['Reviews', $stats['reviews'], 'Across all listings'],
-    ] as [$label, $value, $note])
-        <div class="p-5">
-            <dt class="text-sm font-semibold text-muted">{{ $label }}</dt>
-            <dd class="mt-1 font-display text-5xl leading-none font-semibold text-navy">{{ $value }}</dd>
-            <dd class="mt-1.5 text-sm text-muted">{{ $note }}</dd>
-        </div>
-    @endforeach
-    <div class="p-5">
-        <dt class="text-sm font-semibold text-muted">Average rating</dt>
-        <dd class="mt-2"><x-ui.plate :rating="$stats['average']" :count="$stats['reviews']" class="!text-3xl" /></dd>
-        <dd class="mt-1.5 text-sm text-muted">{{ $stats['reviews'] ? 'Out of 5' : 'No reviews yet' }}</dd>
-    </div>
-</dl>
+{{-- Headline numbers (counted from the database) and this week's pump prices. --}}
+<x-dash.hero eyebrow="Your business at a glance" title="How your listings are doing" :fuel-series="$fuelSeries" :fuel-href="route('home').'#fuel-title'"
+    :stats="[
+        ['Live', $stats['approved'], 0, 'Visible to drivers'],
+        ['In review', $stats['pending'], 0, 'Waiting for an administrator'],
+        ['Reviews', $stats['reviews'], 0, 'Across all listings'],
+        ['Average rating', $stats['reviews'] ? $stats['average'] : null, 1, $stats['reviews'] ? 'Out of 5' : 'No reviews yet'],
+    ]">
+    {{ now()->format('l, F j, Y') }}
+</x-dash.hero>
 
 @foreach ($rejected as $item)
     <div class="mt-6 flex flex-wrap items-start justify-between gap-4 rounded-lg border border-danger/30 bg-danger-50 p-5" role="alert">
@@ -44,7 +35,7 @@
         @else
             <ul class="space-y-3">
                 @foreach ($establishments as $e)
-                    <li class="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-lg border border-line bg-white p-4">
+                    <li class="dash-rise dash-tile flex flex-wrap items-center gap-x-5 gap-y-3 rounded-lg border border-line bg-white p-4" style="--i: {{ min($loop->index, 10) + 5 }}">
                         <img src="{{ $e->imageUrl() }}" alt="" class="size-16 shrink-0 rounded-md object-cover">
                         <div class="min-w-0 flex-1 basis-48">
                             <p class="truncate font-display text-2xl font-semibold text-navy">{{ $e->name }}</p>
@@ -61,7 +52,7 @@
     <section>
         <h2 class="mb-3 text-3xl">Latest reviews</h2>
         @forelse ($latestReviews as $review)
-            <article class="mb-3 rounded-lg border border-line bg-white p-4">
+            <article class="dash-rise mb-3 rounded-lg border border-line bg-white p-4" style="--i: {{ $loop->index + 6 }}">
                 <div class="flex items-center justify-between gap-2">
                     <p class="truncate font-semibold text-navy">{{ $review->user->name }}</p>
                     <x-ui.stars :rating="$review->rating" />

@@ -39,6 +39,10 @@
     --color-danger-700: #b91c1c;
     --color-danger-50: #fef2f2;
 
+    /* Fuel price board (dark surface): a hike costs drivers more, a rollback saves them money. */
+    --color-hike: #fb7a7a;
+    --color-rollback: #4ade80;
+
     --radius-sign: 0.375rem;
 
     --animate-flap: flap 0.14s ease-out;
